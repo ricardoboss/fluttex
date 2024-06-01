@@ -49,7 +49,7 @@ class BrowserController with ChangeNotifier {
 
   Future<String> loadFile({required Uri uri}) async {
     if (uri.scheme.isEmpty) {
-      uri = Uri.parse('https://$uri');
+      uri = Uri.parse('buss://$uri');
     }
 
     return switch (uri.scheme) {
