@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fluttex/browser_controller.dart';
+import 'package:fluttex/page_builder.dart';
 
 class BrowserUi extends StatefulWidget {
   const BrowserUi({super.key});
@@ -10,12 +11,17 @@ class BrowserUi extends StatefulWidget {
 
 class _BrowserUiState extends State<BrowserUi> {
   final _controller = BrowserController();
+  final _uriController = TextEditingController();
+
+  late PageBuilder _pageBuilder;
 
   @override
   void initState() {
     super.initState();
 
     _controller.addListener(_onBrowserChanged);
+    _pageBuilder = _controller.getPageBuilder();
+    _uriController.text = _pageBuilder.getUri().toString();
   }
 
   @override
@@ -26,14 +32,17 @@ class _BrowserUiState extends State<BrowserUi> {
   }
 
   void _onBrowserChanged() {
-    setState(() {});
+    if (mounted) {
+      setState(() {
+        _pageBuilder = _controller.getPageBuilder();
+        _uriController.text = _pageBuilder.getUri().toString();
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final pageBuilder = _controller.getPageBuilder();
-    final page = pageBuilder.buildPage(context);
-    final uri = pageBuilder.getUri();
+    final page = _pageBuilder.buildPage(context);
 
     return Scaffold(
       body: Padding(
@@ -44,11 +53,11 @@ class _BrowserUiState extends State<BrowserUi> {
               height: 48,
               child: Row(
                 children: [
-                  _buildTab(pageBuilder),
+                  _buildTab(),
                   const SizedBox(width: 8),
                   Expanded(
                     child: TextFormField(
-                      initialValue: uri.toString(),
+                      controller: _uriController,
                       decoration: InputDecoration(
                         isDense: true,
                         border: OutlineInputBorder(
@@ -58,11 +67,16 @@ class _BrowserUiState extends State<BrowserUi> {
                       onFieldSubmitted: (value) {
                         final uri = Uri.tryParse(value);
                         if (uri != null) {
-                          _controller.load(uri);
+                          _controller.navigateTo(uri: uri);
                         }
                       },
                       textInputAction: TextInputAction.go,
                     ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: _controller.reload,
                   ),
                 ],
               ),
@@ -80,9 +94,9 @@ class _BrowserUiState extends State<BrowserUi> {
     );
   }
 
-  Widget _buildTab(PageBuilder pageBuilder) {
-    final icon = pageBuilder.buildIcon(context);
-    final title = pageBuilder.getTitle();
+  Widget _buildTab() {
+    final icon = _pageBuilder.buildIcon(context);
+    final title = _pageBuilder.getTitle();
 
     return DecoratedBox(
       decoration: BoxDecoration(
