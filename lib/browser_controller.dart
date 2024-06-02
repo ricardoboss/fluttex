@@ -2,11 +2,14 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:fluttex/error_page_builder.dart';
-import 'package:fluttex/home_page_builder.dart';
-import 'package:fluttex/html_page_builder.dart';
-import 'package:fluttex/loading_page_builder.dart';
-import 'package:fluttex/page_builder.dart';
+import 'package:fluttex/page_builders/error_page_builder.dart';
+import 'package:fluttex/page_builders/home_page_builder.dart';
+import 'package:fluttex/page_builders/loading_page_builder.dart';
+import 'package:fluttex/page_builders/page_builder.dart';
+import 'package:fluttex/response_processors/html_response_processor.dart';
+import 'package:fluttex/response_processors/image_response_processor.dart';
+import 'package:fluttex/response_processors/response_processor.dart';
+import 'package:fluttex/response_processors/text_response_processor.dart';
 import 'package:http/http.dart' as http;
 
 class BrowserController with ChangeNotifier {
@@ -14,7 +17,7 @@ class BrowserController with ChangeNotifier {
 
   PageBuilder getPageBuilder() => _pageBuilder;
 
-  Future<void> reload() async => await navigateTo(uri: _pageBuilder.getUri());
+  Future<void> reload() async => await navigateTo(uri: _pageBuilder.head.uri);
 
   Future<void> navigateTo({required Uri uri}) async {
     _pageBuilder = LoadingPageBuilder(uri: uri);
@@ -34,47 +37,82 @@ class BrowserController with ChangeNotifier {
       return loadInternal(uri: uri);
     } else {
       try {
-        final source = await loadFile(uri: uri);
+        final processor = await loadFile(uri: uri);
 
-        return HtmlPageBuilder.fromSource(
-          uri: uri,
-          source: source,
-          controller: this,
-        );
+        return processor.process();
       } catch (e) {
         return ErrorPageBuilder(error: e, uri: uri);
       }
     }
   }
 
-  Future<String> loadFile({required Uri uri}) async {
+  final List<String> _supportedResponseTypes = [
+    'text/html',
+    'application/json',
+    'application/lua',
+    'application/dart',
+    'application/javascript',
+    'text/css',
+    'text/javascript',
+    'text/plain',
+    'image/svg+xml',
+    'image/webp',
+    'image/bmp',
+    'image/png',
+    'image/jpeg',
+    'image/gif',
+  ];
+
+  String get _supportedTypesAcceptHeader => _supportedResponseTypes.join(',');
+
+  Future<ResponseProcessor> loadFile({required Uri uri}) async {
     if (uri.scheme.isEmpty) {
       uri = Uri.parse('buss://$uri');
     }
 
-    return switch (uri.scheme) {
-      'http' => loadHttpFile(uri: uri),
-      'https' => loadHttpFile(uri: uri),
-      'buss' => loadBussFile(uri: uri),
-      'file' => loadLocalFile(uri: uri),
+    if (uri.scheme == 'file') {
+      return getLocalFileProcessor(uri: uri);
+    }
+
+    final response = await switch (uri.scheme) {
+      'http' => getHttpResponse(uri: uri),
+      'https' => getHttpResponse(uri: uri),
+      'buss' => getBussResponse(uri: uri),
       _ => throw UnsupportedError('Unsupported scheme: ${uri.scheme}'),
+    };
+
+    final responseType = response.headers['content-type']?.split(';').first;
+    if (responseType == null) {
+      throw Exception('No content-type header');
+    }
+
+    return switch (responseType) {
+      'text/html' => HtmlResponseProcessor(
+          response: response,
+          controller: this,
+        ),
+      _ when responseType.startsWith('text/') => TextResponseProcessor(
+          response: response,
+        ),
+      _ when responseType.startsWith('image/') => ImageResponseProcessor(
+          response: response,
+        ),
+      _ => throw Exception('Unsupported response type: $responseType'),
     };
   }
 
-  Future<String> loadHttpFile({required Uri uri}) async {
+  Future<http.Response> getHttpResponse({required Uri uri}) async {
     assert(
       ['http', 'https'].contains(uri.scheme),
       'Unsupported scheme: ${uri.scheme}',
     );
 
-    final response = await _get(uri, headers: {'Accept': 'text/html'});
-
-    return response.body;
+    return await _get(uri, headers: {'Accept': _supportedTypesAcceptHeader});
   }
 
   final _bussTlds = [];
 
-  Future<String> loadBussFile({required Uri uri}) async {
+  Future<http.Response> getBussResponse({required Uri uri}) async {
     await _loadBussTlds();
 
     final resolvedUri = await _resolveBussUrl(uri);
@@ -90,9 +128,7 @@ class BrowserController with ChangeNotifier {
       );
     }
 
-    final response = await _get(uri, headers: {'Accept': 'text/html'});
-
-    return response.body;
+    return await _get(uri, headers: {'Accept': _supportedTypesAcceptHeader});
   }
 
   final _bussDnsCache = <String, String>{};
@@ -166,15 +202,16 @@ class BrowserController with ChangeNotifier {
     return response;
   }
 
-  Future<String> loadLocalFile({required Uri uri}) async {
+  Future<ResponseProcessor> getLocalFileProcessor({required Uri uri}) async {
     assert(
       ['file'].contains(uri.scheme),
       'Unsupported scheme: ${uri.scheme}',
     );
 
     final file = File(uri.path);
+    // final content = await file.readAsString();
 
-    return await file.readAsString();
+    throw UnimplementedError('Not implemented');
   }
 
   Future<PageBuilder> loadInternal({required Uri uri}) async {

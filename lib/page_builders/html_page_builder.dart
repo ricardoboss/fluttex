@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:fluttex/page_builders/head_information.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as parser;
 
 import 'package:fluttex/browser_controller.dart';
-import 'package:fluttex/page_builder.dart';
+import 'package:fluttex/page_builders/page_builder.dart';
 
 class HtmlPageBuilder extends PageBuilder {
   HtmlPageBuilder({
     required this.uri,
+    required this.head,
     required this.document,
     required this.controller,
   });
 
   factory HtmlPageBuilder.fromSource({
     required Uri uri,
+    required HeadInformation headInformation,
     required String source,
     required BrowserController controller,
   }) {
@@ -21,6 +24,7 @@ class HtmlPageBuilder extends PageBuilder {
 
     return HtmlPageBuilder(
       uri: uri,
+      head: headInformation,
       document: document,
       controller: controller,
     );
@@ -31,11 +35,6 @@ class HtmlPageBuilder extends PageBuilder {
   final BrowserController controller;
 
   @override
-  Widget buildIcon(BuildContext context) {
-    return const Icon(Icons.code);
-  }
-
-  @override
   Widget buildPage(BuildContext context) {
     return SingleChildScrollView(
       child: Text(document.outerHtml),
@@ -43,16 +42,5 @@ class HtmlPageBuilder extends PageBuilder {
   }
 
   @override
-  String getTitle() {
-    final titleElement =
-        document.head?.children.cast<dom.Element?>().firstWhere(
-              (element) => element!.localName == 'title',
-              orElse: () => null,
-            );
-
-    return titleElement?.text ?? 'Untitled';
-  }
-
-  @override
-  Uri getUri() => uri;
+  final HeadInformation head;
 }

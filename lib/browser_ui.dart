@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fluttex/browser_controller.dart';
-import 'package:fluttex/page_builder.dart';
+import 'package:fluttex/page_builders/page_builder.dart';
 
 class BrowserUi extends StatefulWidget {
   const BrowserUi({super.key});
@@ -21,7 +21,7 @@ class _BrowserUiState extends State<BrowserUi> {
 
     _controller.addListener(_onBrowserChanged);
     _pageBuilder = _controller.getPageBuilder();
-    _uriController.text = _pageBuilder.getUri().toString();
+    _uriController.text = _pageBuilder.head.uri.toString();
   }
 
   @override
@@ -35,7 +35,7 @@ class _BrowserUiState extends State<BrowserUi> {
     if (mounted) {
       setState(() {
         _pageBuilder = _controller.getPageBuilder();
-        _uriController.text = _pageBuilder.getUri().toString();
+        _uriController.text = _pageBuilder.head.uri.toString();
       });
     }
   }
@@ -95,8 +95,8 @@ class _BrowserUiState extends State<BrowserUi> {
   }
 
   Widget _buildTab() {
-    final icon = _pageBuilder.buildIcon(context);
-    final title = _pageBuilder.getTitle();
+    final icon = _pageBuilder.head.iconBuilder(context);
+    final title = _pageBuilder.head.title;
 
     return DecoratedBox(
       decoration: BoxDecoration(
