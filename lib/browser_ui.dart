@@ -108,10 +108,13 @@ class _BrowserUiState extends State<BrowserUi> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(
-            width: 48,
-            height: 48,
-            child: icon,
+          Padding(
+            padding: const EdgeInsets.all(6.0),
+            child: SizedBox(
+              width: 42,
+              height: 42,
+              child: icon,
+            ),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),

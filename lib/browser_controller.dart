@@ -10,6 +10,7 @@ import 'package:fluttex/response_processors/html_response_processor.dart';
 import 'package:fluttex/response_processors/image_response_processor.dart';
 import 'package:fluttex/response_processors/response_processor.dart';
 import 'package:fluttex/response_processors/text_response_processor.dart';
+import 'package:fluttex/response_processors/webx_response_processor.dart';
 import 'package:http/http.dart' as http;
 
 class BrowserController with ChangeNotifier {
@@ -74,12 +75,35 @@ class BrowserController with ChangeNotifier {
       return getLocalFileProcessor(uri: uri);
     }
 
-    final response = await switch (uri.scheme) {
-      'http' => getHttpResponse(uri: uri),
-      'https' => getHttpResponse(uri: uri),
-      'buss' => getBussResponse(uri: uri),
-      _ => throw UnsupportedError('Unsupported scheme: ${uri.scheme}'),
-    };
+    if (uri.scheme == 'buss') {
+      return getBussResponseProcessor(uri: uri);
+    }
+
+    return getHttpResponseProcessor(uri: uri);
+  }
+
+  Future<WebXResponseProcessor> getBussResponseProcessor({required Uri uri}) async {
+    assert(
+      ['buss'].contains(uri.scheme),
+      'Unsupported scheme: ${uri.scheme}',
+    );
+
+    final response = await getBussResponse(uri: uri);
+
+    return WebXResponseProcessor(
+      requestedUri: uri,
+      response: response,
+      controller: this,
+    );
+  }
+
+  Future<ResponseProcessor> getHttpResponseProcessor({required Uri uri}) async {
+    assert(
+      ['http', 'https'].contains(uri.scheme),
+      'Unsupported scheme: ${uri.scheme}',
+    );
+
+    final response = await getHttpResponse(uri: uri);
 
     final responseType = response.headers['content-type']?.split(';').first;
     if (responseType == null) {
@@ -88,15 +112,15 @@ class BrowserController with ChangeNotifier {
 
     return switch (responseType) {
       'text/html' => HtmlResponseProcessor(
-          response: response,
-          controller: this,
-        ),
+        response: response,
+        controller: this,
+      ),
       _ when responseType.startsWith('text/') => TextResponseProcessor(
-          response: response,
-        ),
+        response: response,
+      ),
       _ when responseType.startsWith('image/') => ImageResponseProcessor(
-          response: response,
-        ),
+        response: response,
+      ),
       _ => throw Exception('Unsupported response type: $responseType'),
     };
   }
@@ -113,9 +137,7 @@ class BrowserController with ChangeNotifier {
   final _bussTlds = [];
 
   Future<http.Response> getBussResponse({required Uri uri}) async {
-    await _loadBussTlds();
-
-    final resolvedUri = await _resolveBussUrl(uri);
+    final resolvedUri = await resolveBussUrl(uri);
 
     if (resolvedUri.host == 'github.com') {
       final requestedFile = uri.path.isEmpty ? 'index.html' : uri.path;
@@ -133,7 +155,9 @@ class BrowserController with ChangeNotifier {
 
   final _bussDnsCache = <String, String>{};
 
-  Future<Uri> _resolveBussUrl(Uri uri) async {
+  Future<Uri> resolveBussUrl(Uri uri) async {
+    await _loadBussTlds();
+
     final tld = uri.host.split('.').last;
 
     if (!_bussTlds.contains(tld)) {

@@ -4,15 +4,17 @@ import 'package:fluttex/page_builders/head_information.dart';
 import 'package:fluttex/page_builders/page_builder.dart';
 import 'package:html/dom.dart' as dom;
 
-class HtmlPageBuilder extends PageBuilder {
-  HtmlPageBuilder({
-    required this.uri,
+class WebXPageBuilder extends PageBuilder {
+  WebXPageBuilder({
+    required this.requestedUri,
+    required this.resolvedUri,
     required this.head,
     required this.document,
     required this.controller,
   });
 
-  final Uri uri;
+  final Uri requestedUri;
+  final Uri resolvedUri;
   final dom.Document document;
   final BrowserController controller;
 
