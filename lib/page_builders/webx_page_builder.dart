@@ -19,12 +19,48 @@ class WebXPageBuilder extends PageBuilder {
   final BrowserController controller;
 
   @override
+  final HeadInformation head;
+
+  @override
   Widget buildPage(BuildContext context) {
-    return SingleChildScrollView(
-      child: Text(document.outerHtml),
+    return Column(
+      children: [
+        for (var child in document.children)
+          _buildElement(context, child),
+      ],
     );
   }
 
-  @override
-  final HeadInformation head;
+  Widget _buildElement(BuildContext context, dom.Element element) {
+    switch (element.localName) {
+      case 'head':
+        return const SizedBox.shrink();
+      case 'body':
+        return _buildBodyElement(context, element);
+      case 'div':
+        return _buildDivElement(context, element);
+      default:
+        return Text(element.outerHtml);
+    }
+  }
+
+  Widget _buildBodyElement(BuildContext context, dom.Element element) {
+    return ListView(
+      children: [
+        for (var child in element.children)
+          _buildElement(context, child),
+      ],
+    );
+  }
+
+  Widget _buildDivElement(BuildContext context, dom.Element element) {
+    // TODO get class and check style
+
+    return Column(
+      children: [
+        for (var child in element.children)
+          _buildElement(context, child),
+      ],
+    );
+  }
 }
