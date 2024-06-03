@@ -13,7 +13,7 @@ class HtmlTokenizer {
 
     var state = _TokenizerState.initial;
     final buffer = StringBuffer();
-    final queue = Queue()..addAll(html.split(''));
+    final queue = Queue<String>()..addAll(html.split(''));
     while (queue.isNotEmpty) {
       final char = queue.removeFirst();
 

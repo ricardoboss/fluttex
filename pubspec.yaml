@@ -19,6 +19,9 @@ dependencies:
   html_parser:
     path: packages/html_parser
 
+  css_parser:
+    path: packages/css_parser
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

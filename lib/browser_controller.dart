@@ -109,16 +109,16 @@ class BrowserController with ChangeNotifier {
 
     return switch (responseType) {
       'text/html' => WebXResponseProcessor(
-        requestedUri: uri,
-        response: response,
-        controller: this,
-      ),
+          requestedUri: uri,
+          response: response,
+          controller: this,
+        ),
       _ when responseType.startsWith('text/') => TextResponseProcessor(
-        response: response,
-      ),
+          response: response,
+        ),
       _ when responseType.startsWith('image/') => ImageResponseProcessor(
-        response: response,
-      ),
+          response: response,
+        ),
       _ => throw Exception('Unsupported response type: $responseType'),
     };
   }
@@ -176,13 +176,13 @@ class BrowserController with ChangeNotifier {
     );
 
     if (resolvedUri.host == 'github.com') {
-      final requestedFile = uri.path.isEmpty ? 'index.html' : uri.path;
+      final requestedFile = uri.path.isEmpty ? '/index.html' : uri.path;
       final username = resolvedUri.pathSegments.first;
       final repo = resolvedUri.pathSegments.last;
 
       // convert to raw.githubusercontent.com url
       uri = Uri.parse(
-        'https://raw.githubusercontent.com/$username/$repo/main/$requestedFile',
+        'https://raw.githubusercontent.com/$username/$repo/main$requestedFile',
       );
     }
 
@@ -194,9 +194,9 @@ class BrowserController with ChangeNotifier {
   final _bussDnsCache = <String, String>{};
 
   Future<Uri> resolveUrl(
-    Uri uri,
+    Uri uri, [
     void Function(Uri updatedUrl)? onSchemeChanged,
-  ) async {
+  ]) async {
     await _loadBussTlds();
 
     final tld = uri.host.split('.').last;
@@ -292,7 +292,7 @@ class BrowserController with ChangeNotifier {
         ),
         document: document,
         source: content,
-        controller: this,
+        browser: this,
       );
     } catch (e) {
       return ErrorPageBuilder(error: e, uri: uri);

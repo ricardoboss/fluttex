@@ -52,4 +52,10 @@ class HtmlDocument {
 
     return null;
   }
+
+  Iterable<HtmlElement> findAllElements(
+    bool Function(HtmlElement element) test,
+  ) sync* {
+    yield* findAll<HtmlElement>(test);
+  }
 }
