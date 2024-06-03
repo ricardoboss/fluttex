@@ -3,14 +3,17 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:fluttex/page_builders/error_page_builder.dart';
+import 'package:fluttex/page_builders/head_information.dart';
 import 'package:fluttex/page_builders/home_page_builder.dart';
 import 'package:fluttex/page_builders/loading_page_builder.dart';
 import 'package:fluttex/page_builders/page_builder.dart';
+import 'package:fluttex/page_builders/webx_page_builder.dart';
 import 'package:fluttex/response_processors/html_response_processor.dart';
 import 'package:fluttex/response_processors/image_response_processor.dart';
 import 'package:fluttex/response_processors/response_processor.dart';
 import 'package:fluttex/response_processors/text_response_processor.dart';
 import 'package:fluttex/response_processors/webx_response_processor.dart';
+import 'package:html_parser/html_parser.dart';
 import 'package:http/http.dart' as http;
 
 class BrowserController with ChangeNotifier {
@@ -36,14 +39,18 @@ class BrowserController with ChangeNotifier {
   Future<PageBuilder> loadPage({required Uri uri}) async {
     if (uri.scheme == 'fluttex') {
       return loadInternal(uri: uri);
-    } else {
-      try {
-        final processor = await loadFile(uri: uri);
+    }
 
-        return processor.process();
-      } catch (e) {
-        return ErrorPageBuilder(error: e, uri: uri);
-      }
+    if (uri.scheme == 'file') {
+      return getLocalFile(uri: uri);
+    }
+
+    try {
+      final processor = await loadFile(uri: uri);
+
+      return await processor.process();
+    } catch (e) {
+      return ErrorPageBuilder(error: e, uri: uri);
     }
   }
 
@@ -71,10 +78,6 @@ class BrowserController with ChangeNotifier {
       uri = Uri.parse('buss://$uri');
     }
 
-    if (uri.scheme == 'file') {
-      return getLocalFileProcessor(uri: uri);
-    }
-
     if (uri.scheme == 'buss') {
       return getBussResponseProcessor(uri: uri);
     }
@@ -82,7 +85,8 @@ class BrowserController with ChangeNotifier {
     return getHttpResponseProcessor(uri: uri);
   }
 
-  Future<WebXResponseProcessor> getBussResponseProcessor({required Uri uri}) async {
+  Future<WebXResponseProcessor> getBussResponseProcessor(
+      {required Uri uri}) async {
     assert(
       ['buss'].contains(uri.scheme),
       'Unsupported scheme: ${uri.scheme}',
@@ -112,15 +116,15 @@ class BrowserController with ChangeNotifier {
 
     return switch (responseType) {
       'text/html' => HtmlResponseProcessor(
-        response: response,
-        controller: this,
-      ),
+          response: response,
+          controller: this,
+        ),
       _ when responseType.startsWith('text/') => TextResponseProcessor(
-        response: response,
-      ),
+          response: response,
+        ),
       _ when responseType.startsWith('image/') => ImageResponseProcessor(
-        response: response,
-      ),
+          response: response,
+        ),
       _ => throw Exception('Unsupported response type: $responseType'),
     };
   }
@@ -226,16 +230,32 @@ class BrowserController with ChangeNotifier {
     return response;
   }
 
-  Future<ResponseProcessor> getLocalFileProcessor({required Uri uri}) async {
+  Future<PageBuilder> getLocalFile({required Uri uri}) async {
     assert(
       ['file'].contains(uri.scheme),
       'Unsupported scheme: ${uri.scheme}',
     );
 
-    final file = File(uri.path);
-    // final content = await file.readAsString();
+    try {
+      final file = File(uri.path);
+      final content = await file.readAsString();
+      final document = const HtmlParser().parse(content);
 
-    throw UnimplementedError('Not implemented');
+      return WebXPageBuilder(
+        requestedUri: uri,
+        resolvedUri: uri,
+        head: HeadInformation(
+          title: uri.pathSegments.last,
+          iconBuilder: (BuildContext context) =>
+              const Icon(Icons.text_snippet_outlined),
+          uri: uri,
+        ),
+        document: document,
+        controller: this,
+      );
+    } catch (e) {
+      return ErrorPageBuilder(error: e, uri: uri);
+    }
   }
 
   Future<PageBuilder> loadInternal({required Uri uri}) async {

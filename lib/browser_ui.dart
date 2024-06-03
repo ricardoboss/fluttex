@@ -109,10 +109,10 @@ class _BrowserUiState extends State<BrowserUi> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
-            padding: const EdgeInsets.all(6.0),
+            padding: const EdgeInsets.only(left: 8.0, top: 8.0, bottom: 8.0),
             child: SizedBox(
-              width: 42,
-              height: 42,
+              width: 40,
+              height: 40,
               child: icon,
             ),
           ),
