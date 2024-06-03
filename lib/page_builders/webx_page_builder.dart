@@ -88,33 +88,13 @@ class WebXPageBuilder extends PageBuilder {
 
   Widget _buildNested(BuildContext context, HtmlElement element, int level) {
     // TODO get class and check style
-    final hue = level / 10 * 360;
-    final color = HSVColor.fromAHSV(1, hue, 0.5, 0.5);
-    var summary = element.tagName;
-    for (var attribute in element.attributes.entries) {
-      if (attribute.key == 'class') {
-        summary += '.${attribute.value}';
-      }
-    }
 
-    return Container(
-      color: color.toColor(),
-      child: Stack(
-        children: [
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (var child in element.children)
-                _buildNode(context, child, level + 1),
-            ],
-          ),
-          Positioned(
-            top: 0,
-            right: 0,
-            child: Text(summary),
-          ),
-        ],
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var child in element.children)
+          _buildNode(context, child, level + 1),
+      ],
     );
   }
 
