@@ -98,9 +98,13 @@ class BrowserController with ChangeNotifier {
       onSchemeChanged: (Uri updated) => uri = updated,
     );
 
-    final responseType = response.headers['content-type']?.split(';').first;
+    var responseType = response.headers['content-type']?.split(';').first;
     if (responseType == null) {
       throw Exception('No content-type header');
+    }
+
+    if (uri.scheme == 'buss') {
+      responseType = 'text/html';
     }
 
     return switch (responseType) {
