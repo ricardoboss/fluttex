@@ -1,6 +1,5 @@
 name: html_parser
 description: A library for parsing HTML documents
-version: 1.0.0
 
 environment:
   sdk: ^3.3.4
