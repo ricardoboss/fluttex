@@ -85,14 +85,18 @@ class BrowserController with ChangeNotifier {
     return getHttpResponseProcessor(uri: uri);
   }
 
-  Future<WebXResponseProcessor> getBussResponseProcessor(
-      {required Uri uri}) async {
+  Future<WebXResponseProcessor> getBussResponseProcessor({
+    required Uri uri,
+  }) async {
     assert(
       ['buss'].contains(uri.scheme),
       'Unsupported scheme: ${uri.scheme}',
     );
 
-    final response = await getBussResponse(uri: uri);
+    final response = await getBussResponse(
+      uri: uri,
+      onSchemeChanged: (Uri updated) => uri = updated,
+    );
 
     return WebXResponseProcessor(
       requestedUri: uri,
@@ -140,8 +144,18 @@ class BrowserController with ChangeNotifier {
 
   final _bussTlds = [];
 
-  Future<http.Response> getBussResponse({required Uri uri}) async {
-    final resolvedUri = await resolveBussUrl(uri);
+  Future<http.Response> getBussResponse({
+    required Uri uri,
+    void Function(Uri updatedUrl)? onSchemeChanged,
+  }) async {
+    final resolvedUri = await resolveUrl(
+      uri,
+      (updated) {
+        uri = updated;
+
+        onSchemeChanged?.call(updated);
+      },
+    );
 
     if (resolvedUri.host == 'github.com') {
       final requestedFile = uri.path.isEmpty ? 'index.html' : uri.path;
@@ -154,19 +168,27 @@ class BrowserController with ChangeNotifier {
       );
     }
 
+    assert(uri.scheme == 'https', 'Unsupported scheme: ${uri.scheme}');
+
     return await _get(uri, headers: {'Accept': _supportedTypesAcceptHeader});
   }
 
   final _bussDnsCache = <String, String>{};
 
-  Future<Uri> resolveBussUrl(Uri uri) async {
+  Future<Uri> resolveUrl(
+    Uri uri,
+    void Function(Uri updatedUrl)? onSchemeChanged,
+  ) async {
     await _loadBussTlds();
 
     final tld = uri.host.split('.').last;
 
     if (!_bussTlds.contains(tld)) {
-      throw Exception(
-          'The TLD "$tld" is not supported. Supported TLDs: ${_bussTlds.join(', ')}');
+      uri = uri.replace(scheme: 'https');
+
+      onSchemeChanged?.call(uri);
+
+      return uri;
     }
 
     final name = uri.host.split('.').first;
@@ -196,7 +218,7 @@ class BrowserController with ChangeNotifier {
 
     final ip = InternetAddress(target);
 
-    return uri.replace(host: ip.address);
+    return uri.replace(scheme: 'https', host: ip.address);
   }
 
   Future<void> _loadBussTlds() async {
