@@ -153,9 +153,14 @@ class HtmlParser {
       }
 
       final name = tokens.removeToken(HtmlTokenType.attributeName).text;
-      final value = tokens.removeToken(HtmlTokenType.attributeValue).text;
 
-      attributes[name] = value;
+      if (tokens.firstType == HtmlTokenType.attributeValue) {
+        final value = tokens.removeToken(HtmlTokenType.attributeValue).text;
+
+        attributes[name] = value;
+      } else {
+        attributes[name] = '';
+      }
     }
 
     return attributes;

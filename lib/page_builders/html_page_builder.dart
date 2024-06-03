@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttex/browser_controller.dart';
 import 'package:fluttex/page_builders/head_information.dart';
 import 'package:fluttex/page_builders/page_builder.dart';
-import 'package:html/dom.dart' as dom;
+import 'package:html_parser/html_document.dart';
 
 class HtmlPageBuilder extends PageBuilder {
   HtmlPageBuilder({
@@ -13,13 +13,13 @@ class HtmlPageBuilder extends PageBuilder {
   });
 
   final Uri uri;
-  final dom.Document document;
+  final HtmlDocument document;
   final BrowserController controller;
 
   @override
   Widget buildPage(BuildContext context) {
     return SingleChildScrollView(
-      child: Text(document.outerHtml),
+      child: Text(document.text),
     );
   }
 

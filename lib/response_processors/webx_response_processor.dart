@@ -18,7 +18,7 @@ class WebXResponseProcessor extends ResponseProcessor {
 
   @override
   Future<WebXPageBuilder> process() async {
-    final document = HtmlParser().parse(response.body);
+    final document = const HtmlParser().parse(response.body);
 
     final baseUri = response.request!.url;
     final title = getTitle(document);

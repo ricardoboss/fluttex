@@ -10,6 +10,8 @@ class HtmlDocument {
 
   final Iterable<HtmlNode> nodes;
 
+  String get text => nodes.map((n) => n.text).join();
+
   T? findFirst<T extends HtmlNode>(bool Function(T node) test) {
     final nodes = Queue()..addAll(this.nodes);
 
@@ -25,6 +27,21 @@ class HtmlDocument {
     }
 
     return null;
+  }
+
+  Iterable<T> findAll<T extends HtmlNode>(bool Function(T node) test) sync* {
+    final nodes = Queue()..addAll(this.nodes);
+
+    while (nodes.isNotEmpty) {
+      final node = nodes.removeFirst();
+      if (node is T && test(node)) {
+        yield node;
+      }
+
+      if (node is HtmlElement) {
+        nodes.addAll(node.children);
+      }
+    }
   }
 
   HtmlElement? findFirstElement(bool Function(HtmlElement element) test) {

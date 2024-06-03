@@ -30,4 +30,6 @@ class HtmlElement extends HtmlNode {
 
   @override
   String get text => children.map((n) => n.text).join();
+
+  String? get className => attributes['class'];
 }

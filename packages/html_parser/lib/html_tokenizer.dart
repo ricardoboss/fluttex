@@ -62,9 +62,9 @@ class HtmlTokenizer {
 
               yield HtmlToken(HtmlTokenType.tagName, tagName);
 
-              state = _TokenizerState.insideTag;
-
               yield HtmlToken(HtmlTokenType.whitespace, ' ');
+
+              state = _TokenizerState.insideTag;
 
               break;
             case _TokenizerState.attributeValue:
@@ -97,11 +97,30 @@ class HtmlTokenizer {
               state = _TokenizerState.initial;
 
               break;
+            case _TokenizerState.attributeName:
+              if (buffer.isEmpty) {
+                throw Exception('Empty attribute name');
+              }
+
+              final attributeName = buffer.toString();
+              buffer.clear();
+
+              yield HtmlToken(HtmlTokenType.attributeName, attributeName);
+
+              yield HtmlToken(HtmlTokenType.tagClose, '>');
+
+              state = _TokenizerState.initial;
+
+              break;
             default:
               throw UnimplementedError("Unexpected '>' in state $state");
           }
         case '/':
           switch (state) {
+            case _TokenizerState.initial:
+              buffer.write(char);
+
+              break;
             case _TokenizerState.tagName:
               if (buffer.isEmpty) {
                 throw Exception('Empty tag name');
@@ -159,9 +178,9 @@ class HtmlTokenizer {
 
               yield HtmlToken(HtmlTokenType.tagName, tagName);
 
-              state = _TokenizerState.insideTag;
-
               yield HtmlToken(HtmlTokenType.whitespace, char);
+
+              state = _TokenizerState.insideTag;
 
               break;
             case _TokenizerState.insideTag:

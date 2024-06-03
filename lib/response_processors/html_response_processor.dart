@@ -3,8 +3,8 @@ import 'package:fluttex/browser_controller.dart';
 import 'package:fluttex/page_builders/head_information.dart';
 import 'package:fluttex/page_builders/html_page_builder.dart';
 import 'package:fluttex/response_processors/response_processor.dart';
-import 'package:html/dom.dart' as dom;
-import 'package:html/parser.dart' as parser;
+import 'package:html_parser/html_document.dart';
+import 'package:html_parser/html_parser.dart';
 
 class HtmlResponseProcessor extends ResponseProcessor {
   const HtmlResponseProcessor({
@@ -16,7 +16,7 @@ class HtmlResponseProcessor extends ResponseProcessor {
 
   @override
   Future<HtmlPageBuilder> process() async {
-    final document = parser.parse(response.body);
+    final document = const HtmlParser().parse(response.body);
 
     final baseUri = response.request!.url;
     final title = getTitle(document);
@@ -36,8 +36,8 @@ class HtmlResponseProcessor extends ResponseProcessor {
     );
   }
 
-  String? getTitle(dom.Document document) {
-    final titleElement = document.head!.querySelector('title');
+  String? getTitle(HtmlDocument document) {
+    final titleElement = document.findFirstElement((n) => n.tagName == 'title');
     if (titleElement == null) {
       return null;
     }
@@ -45,8 +45,10 @@ class HtmlResponseProcessor extends ResponseProcessor {
     return titleElement.text;
   }
 
-  Uri? getIconUri(dom.Document document, Uri baseUri) {
-    final linkElement = document.head!.querySelector('link[rel="icon"]');
+  Uri? getIconUri(HtmlDocument document, Uri baseUri) {
+    final linkElement = document.findFirstElement(
+      (n) => n.tagName == 'link' && n.attributes['href'] != null,
+    );
     if (linkElement == null) {
       return null;
     }
@@ -56,6 +58,10 @@ class HtmlResponseProcessor extends ResponseProcessor {
       return null;
     }
 
-    return baseUri.resolve(href);
+    if (href.startsWith('/')) {
+      return baseUri.resolve(href);
+    }
+
+    return Uri.parse(href);
   }
 }
