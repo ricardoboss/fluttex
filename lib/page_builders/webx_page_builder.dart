@@ -40,9 +40,18 @@ class WebXPageBuilder extends PageBuilder {
         const Divider(),
         Container(
           height: 400,
-          color: Colors.black,
-          child: SingleChildScrollView(
-            child: Text(source),
+          color: Theme.of(context).colorScheme.inverseSurface,
+          child: DefaultTextStyle(
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onInverseSurface,
+            ),
+            child: SizedBox(
+              width: double.infinity,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(8),
+                child: Text(source),
+              ),
+            ),
           ),
         ),
       ],
