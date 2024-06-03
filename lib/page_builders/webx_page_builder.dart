@@ -28,14 +28,13 @@ class WebXPageBuilder extends PageBuilder {
 
   @override
   Widget buildPage(BuildContext context) {
-    // final source = const HtmlRenderer().render(document);
     final body = document.findFirstElement((n) => n.tagName == 'body')!;
 
     return Column(
       children: [
         Expanded(
           child: SingleChildScrollView(
-            child: _buildNode(context, body, 0),
+            child: _buildElement(context, body, 0),
           ),
         ),
         const Divider(),
