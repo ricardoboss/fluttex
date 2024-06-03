@@ -8,15 +8,27 @@ class LoadingPageBuilder extends PageBuilder {
   final Uri uri;
 
   @override
-  Widget buildPage(BuildContext context) => const SizedBox.shrink();
+  Widget buildPage(BuildContext context) => Center(
+    child: Text(
+      'Loading...',
+      style: Theme.of(context).textTheme.headlineMedium,
+    ),
+  );
 
   @override
   HeadInformation get head => HeadInformation(
         title: 'Loading...',
-        iconBuilder: (context) => const Padding(
-          padding: EdgeInsets.all(16.0),
-          child: CircularProgressIndicator(),
-        ),
+        iconBuilder: (c) => _buildLoader(c, 4),
         uri: uri,
       );
+
+  Widget _buildLoader(BuildContext context, double padding) {
+    return Padding(
+      padding: EdgeInsets.all(padding),
+      child: const CircularProgressIndicator(
+        strokeWidth: 6,
+        strokeCap: StrokeCap.round,
+      ),
+    );
+  }
 }

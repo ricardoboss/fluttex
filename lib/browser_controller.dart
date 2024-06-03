@@ -85,7 +85,7 @@ class BrowserController with ChangeNotifier {
     return getHttpResponseProcessor(uri: uri);
   }
 
-  Future<WebXResponseProcessor> getBussResponseProcessor({
+  Future<ResponseProcessor> getBussResponseProcessor({
     required Uri uri,
   }) async {
     assert(
@@ -98,11 +98,25 @@ class BrowserController with ChangeNotifier {
       onSchemeChanged: (Uri updated) => uri = updated,
     );
 
-    return WebXResponseProcessor(
-      requestedUri: uri,
-      response: response,
-      controller: this,
-    );
+    final responseType = response.headers['content-type']?.split(';').first;
+    if (responseType == null) {
+      throw Exception('No content-type header');
+    }
+
+    return switch (responseType) {
+      'text/html' => WebXResponseProcessor(
+        requestedUri: uri,
+        response: response,
+        controller: this,
+      ),
+      _ when responseType.startsWith('text/') => TextResponseProcessor(
+        response: response,
+      ),
+      _ when responseType.startsWith('image/') => ImageResponseProcessor(
+        response: response,
+      ),
+      _ => throw Exception('Unsupported response type: $responseType'),
+    };
   }
 
   Future<ResponseProcessor> getHttpResponseProcessor({required Uri uri}) async {
@@ -273,6 +287,7 @@ class BrowserController with ChangeNotifier {
           uri: uri,
         ),
         document: document,
+        source: content,
         controller: this,
       );
     } catch (e) {

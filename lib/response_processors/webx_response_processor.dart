@@ -35,6 +35,7 @@ class WebXResponseProcessor extends ResponseProcessor {
         uri: requestedUri,
       ),
       document: document,
+      source: response.body,
       controller: controller,
     );
   }

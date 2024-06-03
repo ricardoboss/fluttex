@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttex/browser_controller.dart';
 import 'package:fluttex/page_builders/page_builder.dart';
@@ -53,7 +54,7 @@ class _BrowserUiState extends State<BrowserUi> {
               height: 48,
               child: Row(
                 children: [
-                  _buildTab(),
+                  _buildTab(context),
                   const SizedBox(width: 8),
                   Expanded(
                     child: TextFormField(
@@ -94,30 +95,30 @@ class _BrowserUiState extends State<BrowserUi> {
     );
   }
 
-  Widget _buildTab() {
+  Widget _buildTab(BuildContext context) {
     final icon = _pageBuilder.head.iconBuilder(context);
     final title = _pageBuilder.head.title;
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        border: Border.fromBorderSide(
-          const OutlineInputBorder().borderSide,
+        border: Border.all(
+          color: Theme.of(context).colorScheme.onBackground,
+          width: 0.5,
         ),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0, top: 8.0, bottom: 8.0),
-            child: SizedBox(
-              width: 40,
-              height: 40,
+          AspectRatio(
+            aspectRatio: 1,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
               child: icon,
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, right: 8.0),
             child: Text(title),
           ),
         ],

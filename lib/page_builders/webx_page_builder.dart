@@ -5,7 +5,6 @@ import 'package:fluttex/page_builders/page_builder.dart';
 import 'package:html_parser/html_document.dart';
 import 'package:html_parser/html_element.dart';
 import 'package:html_parser/html_node.dart';
-import 'package:html_parser/html_renderer.dart';
 import 'package:html_parser/html_text.dart';
 
 class WebXPageBuilder extends PageBuilder {
@@ -14,12 +13,14 @@ class WebXPageBuilder extends PageBuilder {
     required this.resolvedUri,
     required this.head,
     required this.document,
+    required this.source,
     required this.controller,
   });
 
   final Uri requestedUri;
   final Uri resolvedUri;
   final HtmlDocument document;
+  final String source;
   final BrowserController controller;
 
   @override
@@ -27,15 +28,14 @@ class WebXPageBuilder extends PageBuilder {
 
   @override
   Widget buildPage(BuildContext context) {
-    final source = const HtmlRenderer().render(document);
+    // final source = const HtmlRenderer().render(document);
+    final body = document.findFirstElement((n) => n.tagName == 'body')!;
 
     return Column(
       children: [
         Expanded(
-          child: ListView(
-            children: [
-              for (var child in document.nodes) _buildNode(context, child),
-            ],
+          child: SingleChildScrollView(
+            child: _buildNode(context, body, 0),
           ),
         ),
         const Divider(),
@@ -50,24 +50,26 @@ class WebXPageBuilder extends PageBuilder {
     );
   }
 
-  Widget _buildNode(BuildContext context, HtmlNode element) {
-    switch (element) {
-      case HtmlText text:
-        return Text(text.text);
-      case HtmlElement element:
-        return _buildElement(context, element);
-      default:
-        return const Text('Unknown node');
-    }
+  Widget _buildNode(BuildContext context, HtmlNode element, int level) {
+    return switch (element) {
+      HtmlText text => Text(text.text),
+      HtmlElement element => _buildElement(context, element, level),
+      _ => const Text('Unknown node'),
+    };
   }
 
-  Widget _buildElement(BuildContext context, HtmlElement element) {
+  Widget _buildElement(BuildContext context, HtmlElement element, int level) {
     switch (element.tagName) {
-      case 'head':
       case 'body':
       case 'div':
       case 'html':
-        return _buildNested(context, element);
+      case 'p':
+        return _buildNested(context, element, level);
+      case 'button':
+        return _buildButton(context, element);
+      case 'input':
+        return _buildInput(context, element);
+      case 'head':
       case 'title':
       case 'link':
       case 'meta':
@@ -85,14 +87,35 @@ class WebXPageBuilder extends PageBuilder {
     }
   }
 
-  Widget _buildNested(BuildContext context, HtmlElement element) {
+  Widget _buildNested(BuildContext context, HtmlElement element, int level) {
     // TODO get class and check style
+    final hue = level / 10 * 360;
+    final color = HSVColor.fromAHSV(1, hue, 0.5, 0.5);
+    var summary = element.tagName;
+    for (var attribute in element.attributes.entries) {
+      if (attribute.key == 'class') {
+        summary += '.${attribute.value}';
+      }
+    }
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (var child in element.children) _buildNode(context, child),
-      ],
+    return Container(
+      color: color.toColor(),
+      child: Stack(
+        children: [
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var child in element.children)
+                _buildNode(context, child, level + 1),
+            ],
+          ),
+          Positioned(
+            top: 0,
+            right: 0,
+            child: Text(summary),
+          ),
+        ],
+      ),
     );
   }
 
@@ -110,6 +133,21 @@ class WebXPageBuilder extends PageBuilder {
     return Text(
       element.text,
       style: TextStyle(fontSize: fontSize),
+    );
+  }
+
+  Widget _buildButton(BuildContext context, HtmlElement element) {
+    return ElevatedButton(
+      onPressed: () {},
+      child: Text(element.text),
+    );
+  }
+
+  Widget _buildInput(BuildContext context, HtmlElement element) {
+    return TextField(
+      decoration: InputDecoration(
+        labelText: element.attributes['placeholder'],
+      ),
     );
   }
 }

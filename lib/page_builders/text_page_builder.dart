@@ -24,7 +24,7 @@ class TextPageBuilder extends PageBuilder {
 
   @override
   HeadInformation get head => HeadInformation(
-        title: '${text.substring(0, 10)}...',
+        title: '${text.substring(0, 10).split('\n').first}...',
         iconBuilder: (context) => const Icon(Icons.text_snippet_outlined),
         uri: uri,
       );
