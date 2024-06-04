@@ -72,55 +72,57 @@ class _BrowserUiState extends State<BrowserUi> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            SizedBox(
-              height: 48,
-              child: Row(
-                children: [
-                  _buildTab(context),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _uriController,
-                      decoration: InputDecoration(
-                        isDense: true,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              SizedBox(
+                height: 48,
+                child: Row(
+                  children: [
+                    _buildTab(context),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _uriController,
+                        decoration: InputDecoration(
+                          isDense: true,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
                         ),
+                        onFieldSubmitted: (value) {
+                          commandBus.fire(NavigateCommand(value));
+                        },
+                        textInputAction: TextInputAction.go,
                       ),
-                      onFieldSubmitted: (value) {
-                        commandBus.fire(NavigateCommand(value));
-                      },
-                      textInputAction: TextInputAction.go,
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(Icons.refresh),
-                    onPressed: () => commandBus.fire(const ReloadCommand()),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: Builder(
-                  builder: (c) {
-                    if (_pageBuilder != null) {
-                      return _pageBuilder!.buildPage(c);
-                    }
-
-                    return const SizedBox.shrink();
-                  },
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.refresh),
+                      onPressed: () => commandBus.fire(const ReloadCommand()),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: Builder(
+                    builder: (c) {
+                      if (_pageBuilder != null) {
+                        return _pageBuilder!.buildPage(c);
+                      }
+
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
