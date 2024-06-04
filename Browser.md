@@ -1,16 +1,82 @@
-The browser will complete these steps to load a web page:
+# Fluttex Browser Architecture
 
-1. Find the target
-2. Send a request
-3. Process the headers
-4. Process the message body
-5. Create a page builder
+## Actors
 
-# Processing the headers
+- User: the person using the app
+- Fluttex: the entrypoint and main scaffolding of the app with fixed UI elements
+- Agent: the layer handling events from the UI, issuing commands to the renderer, dispatching requests to the backend and handling the results
+- Renderer: the engine responsible for building an interactive page using the commands given by the browser and passing events back to the agent
+- Backend: the engine processing requests and handling the responses
+- Sandbox: an environment in which the browser can run Lua and Dart code
 
-1. If status code is a redirect, read the Location header and make a new HTTP request to the new URL.
-2. Check the Content-Type header to determine the MIME type of the response.
-3. If the response is HTML, continue with the HTML Processor
-4. If the response is an image, continue with the Image Processor
-5. If the response is Text, continue with the Text Processor
-6. Otherwise, start a download
+All actors communicate via a central message bus (https://pub.dev/packages/event_bus).
+
+### Fluttex
+
+- Composes the scaffolding of the app
+- Provides the user with the ability to enter an address and other standard browser features
+
+### Agent (Smith)
+
+- Takes in commands from the UI and decides how to handle them
+- Holds the DOM
+
+### Renderer (Flavio)
+
+- Builds an interactive page using information from the agent
+- Passes events back to the agent on user interaction
+- Converts:
+  - HTML to a tree of widgets
+  - Code/CSS/Text to (maybe in the future: syntax highlighted) text
+  - Images to a widget
+- Requests additional resources from the agent if required by the HTML
+
+### Backend (Bob)
+
+- Processes requests and handles responses
+- Resolves URLs and handles DNS
+
+### Sandbox (Sandy)
+
+- Runs Lua and Dart code
+- Provides a sandboxed environment for the code to run in
+- Provides a standard interface for the code to interact with the agent and the DOM
+
+## Example interaction
+
+```mermaid
+sequenceDiagram
+    User->>+Fluttex: Enters address
+
+    Fluttex->>+Smith: NavigateCommand
+
+    Smith-->>Fluttex: TitleChangedEvent
+    Fluttex-->>User: Show updated title
+
+    Smith-->>-Fluttex: FaviconChangedEvent
+    Fluttex-->>User: Show updated favicon
+
+    Smith->>+Bob: SendRequest
+    Bob-->>-Smith: RequestCompleted
+
+    Smith->>+Flavio: DispatchBuilderEvent
+    Flavio-->>Fluttex: RenderPageEvent
+    Fluttex-->>User: Display page
+
+    Flavio-->>Fluttex: TitleChangeEvent
+    Fluttex-->>User: Show updated title
+
+    Flavio-->>+Bob: Request Favicon Bytes
+    Bob-->>-Flavio: Respond Favicon Bytes
+
+    Flavio-->>-Fluttex: FaviconChangeEvent
+    Fluttex-->>User: Show updated favicon
+
+    loop For every resource
+        Fluttex->>+Smith: LoadResource
+        Smith->>+Bob: SendRequest
+        Bob-->>-Smith: RequestCompleted
+        Smith-->>-Fluttex: AddResource
+        Fluttex-->>-User: Update page
+    end
+```

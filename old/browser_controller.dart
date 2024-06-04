@@ -38,11 +38,11 @@ class BrowserController with ChangeNotifier {
 
   Future<PageBuilder> loadPage({required Uri uri}) async {
     if (uri.scheme == 'fluttex') {
-      return loadInternal(uri: uri);
+      return await loadInternal(uri: uri);
     }
 
     if (uri.scheme == 'file') {
-      return getLocalFile(uri: uri);
+      return await getLocalFile(uri: uri);
     }
 
     try {
@@ -275,6 +275,8 @@ class BrowserController with ChangeNotifier {
       ['file'].contains(uri.scheme),
       'Unsupported scheme: ${uri.scheme}',
     );
+
+    await Future<void>.delayed(const Duration(milliseconds: 500));
 
     try {
       final file = File(uri.path);

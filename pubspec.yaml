@@ -11,16 +11,17 @@ dependencies:
   flutter:
     sdk: flutter
 
-  cupertino_icons: ^1.0.6
-  http: ^1.2.1
-  html: ^0.15.4
-  xml: ^6.5.0
+  common:
+    path: packages/common
 
-  html_parser:
-    path: packages/html_parser
+  smith:
+    path: packages/smith
 
-  css_parser:
-    path: packages/css_parser
+  flavio:
+    path: packages/flavio
+
+  bob:
+    path: packages/bob
 
 dev_dependencies:
   flutter_test:

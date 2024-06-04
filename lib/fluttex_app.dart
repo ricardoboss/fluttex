@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fluttex/browser_ui.dart';
+import 'package:fluttex/widgets/browser_ui.dart';
 
 class FluttexApp extends StatelessWidget {
   const FluttexApp({super.key});

@@ -1,6 +1,7 @@
+import 'dart:async';
+
+import 'package:common/common.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttex/browser_controller.dart';
-import 'package:fluttex/page_builders/page_builder.dart';
 
 class BrowserUi extends StatefulWidget {
   const BrowserUi({super.key});
@@ -10,40 +11,66 @@ class BrowserUi extends StatefulWidget {
 }
 
 class _BrowserUiState extends State<BrowserUi> {
-  final _controller = BrowserController();
+  late final StreamSubscription<UriChangedEvent> _uriChangedSubscription;
+  late final StreamSubscription<TitleChangedEvent> _titleChangedSubscription;
+  late final StreamSubscription<FaviconChangedEvent>
+      _faviconChangedSubscription;
+  late final StreamSubscription<RenderPageEvent> _renderPageSubscription;
+
   final _uriController = TextEditingController();
 
-  late PageBuilder _pageBuilder;
+  String? _title;
+  Widget Function(BuildContext context)? _faviconBuilder;
+  PageBuilder? _pageBuilder;
 
   @override
   void initState() {
     super.initState();
 
-    _controller.addListener(_onBrowserChanged);
-    _pageBuilder = _controller.getPageBuilder();
-    _uriController.text = _pageBuilder.head.uri.toString();
+    _uriChangedSubscription = uiBus.on<UriChangedEvent>().listen(_onUriChanged);
+    _titleChangedSubscription =
+        uiBus.on<TitleChangedEvent>().listen(_onTitleChanged);
+    _faviconChangedSubscription =
+        uiBus.on<FaviconChangedEvent>().listen(_onFaviconChanged);
+    _renderPageSubscription = uiBus.on<RenderPageEvent>().listen(_onRenderPage);
   }
 
   @override
   void dispose() {
-    super.dispose();
+    _uriChangedSubscription.cancel();
+    _titleChangedSubscription.cancel();
+    _faviconChangedSubscription.cancel();
+    _renderPageSubscription.cancel();
 
-    _controller.removeListener(_onBrowserChanged);
+    super.dispose();
   }
 
-  void _onBrowserChanged() {
-    if (mounted) {
-      setState(() {
-        _pageBuilder = _controller.getPageBuilder();
-        _uriController.text = _pageBuilder.head.uri.toString();
-      });
-    }
+  void _onUriChanged(UriChangedEvent event) {
+    setState(() {
+      _uriController.text = event.uri.toString();
+    });
+  }
+
+  void _onTitleChanged(TitleChangedEvent event) {
+    setState(() {
+      _title = event.title;
+    });
+  }
+
+  void _onFaviconChanged(FaviconChangedEvent event) {
+    setState(() {
+      _faviconBuilder = event.faviconBuilder;
+    });
+  }
+
+  void _onRenderPage(RenderPageEvent event) {
+    setState(() {
+      _pageBuilder = event.builder;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final page = _pageBuilder.buildPage(context);
-
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -65,10 +92,7 @@ class _BrowserUiState extends State<BrowserUi> {
                         ),
                       ),
                       onFieldSubmitted: (value) {
-                        final uri = Uri.tryParse(value);
-                        if (uri != null) {
-                          _controller.navigateTo(uri: uri);
-                        }
+                        commandBus.fire(NavigateCommand(value));
                       },
                       textInputAction: TextInputAction.go,
                     ),
@@ -76,7 +100,7 @@ class _BrowserUiState extends State<BrowserUi> {
                   const SizedBox(width: 8),
                   IconButton(
                     icon: const Icon(Icons.refresh),
-                    onPressed: _controller.reload,
+                    onPressed: () => commandBus.fire(const ReloadCommand()),
                   ),
                 ],
               ),
@@ -85,7 +109,15 @@ class _BrowserUiState extends State<BrowserUi> {
             Expanded(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(6),
-                child: page,
+                child: Builder(
+                  builder: (c) {
+                    if (_pageBuilder != null) {
+                      return _pageBuilder!.buildPage(c);
+                    }
+
+                    return const SizedBox.shrink();
+                  },
+                ),
               ),
             ),
           ],
@@ -95,9 +127,6 @@ class _BrowserUiState extends State<BrowserUi> {
   }
 
   Widget _buildTab(BuildContext context) {
-    final icon = _pageBuilder.head.iconBuilder(context);
-    final title = _pageBuilder.head.title;
-
     return DecoratedBox(
       decoration: BoxDecoration(
         border: Border.all(
@@ -113,12 +142,16 @@ class _BrowserUiState extends State<BrowserUi> {
             aspectRatio: 1,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: icon,
+              child: _faviconBuilder != null
+                  ? _faviconBuilder!(context)
+                  : const SizedBox.shrink(),
             ),
           ),
           Padding(
             padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, right: 8.0),
-            child: Text(title),
+            child: Text(
+              _title ?? 'Untitled',
+            ),
           ),
         ],
       ),
