@@ -1,4 +1,4 @@
-import 'package:html_parser/html_token_type.dart';
+part of '../html_parser.dart';
 
 class HtmlToken {
   const HtmlToken(this.type, this.text);

@@ -1,7 +1,7 @@
 part of '../smith.dart';
 
 class CommandHandler {
-  _CurrentPage? _currentPage;
+  String? _lastQuery;
 
   void register() {
     commandBus.on<ReloadCommand>().listen(_onReload);
@@ -11,24 +11,26 @@ class CommandHandler {
   void _onNavigate(NavigateCommand event) {
     _dispatchLoading();
 
-    requestBus.fire(ResolveUrlRequest(
+    _lastQuery = event.query;
+
+    requestBus.fire(QueryRequest(
       query: event.query,
-      fulfill: _onUrlResolved,
-      reject: _onResolveFailed,
+      fulfill: _onResponse,
+      reject: _onRequestFailed,
     ));
   }
 
   void _onReload(ReloadCommand event) {
-    if (_currentPage == null) {
+    if (_lastQuery == null) {
       return;
     }
 
     _dispatchLoading();
 
-    requestBus.fire(ResolveUrlRequest(
-      query: _currentPage!.uri.toString(),
-      fulfill: _onUrlResolved,
-      reject: _onResolveFailed,
+    requestBus.fire(QueryRequest(
+      query: _lastQuery!,
+      fulfill: _onResponse,
+      reject: _onRequestFailed,
     ));
   }
 
@@ -50,13 +52,19 @@ class CommandHandler {
     );
   }
 
-  Future<void> _onUrlResolved(Uri uri) async {
-    final information = PlaceholderPageInformation(uri: uri);
+  Future<void> _onResponse(http.BaseResponse response) async {
+    final uri = response.request!.url;
+
+    final information = HttpResponsePageInformation(
+      // TODO: only override content-type for text/plain from raw.githubusercontent.com
+      response: response..headers['content-type'] = 'text/html',
+      uri: uri,
+    );
 
     uiBus.fire(DispatchBuilderEvent(information));
   }
 
-  void _onResolveFailed(Object? error) {
+  void _onRequestFailed(Object? error) {
     _onShowErrorPage(
       code: 'resolve-failed',
       error: error,
@@ -74,7 +82,16 @@ class CommandHandler {
       uri: uri,
     );
 
+    uiBus.fire(TitleChangedEvent('Error'));
+    uiBus.fire(FaviconChangedEvent(_buildErrorFavicon));
     uiBus.fire(DispatchBuilderEvent(information));
+  }
+
+  Widget _buildErrorFavicon(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: const Icon(Icons.error),
+    );
   }
 }
 
@@ -101,5 +118,15 @@ class PlaceholderPageInformation extends PageInformation {
     required this.uri,
   });
 
+  final Uri uri;
+}
+
+class HttpResponsePageInformation extends PageInformation {
+  HttpResponsePageInformation({
+    required this.response,
+    required this.uri,
+  });
+
+  final http.BaseResponse response;
   final Uri uri;
 }

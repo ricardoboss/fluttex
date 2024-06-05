@@ -1,5 +1,4 @@
-import 'package:html_parser/html_node.dart';
-import 'package:html_parser/html_node_type.dart';
+part of '../html_parser.dart';
 
 class HtmlErrorNode extends HtmlNode {
   HtmlErrorNode({

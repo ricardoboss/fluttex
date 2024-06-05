@@ -21,6 +21,8 @@ class PageBuilderRegistry {
         return ErrorPageBuilder(information: error);
       case final PlaceholderPageInformation placeholder:
         return PlaceholderPageBuilder(information: placeholder);
+      case final HttpResponsePageInformation httpResponse:
+        return HttpResponsePageBuilder(information: httpResponse);
       default:
         return ErrorPageBuilder(
           information: ErrorPageInformation(

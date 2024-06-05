@@ -96,6 +96,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  html_parser:
+    dependency: transitive
+    description:
+      path: "packages/html_parser"
+      relative: true
+    source: path
+    version: "0.0.0"
   http:
     dependency: transitive
     description:

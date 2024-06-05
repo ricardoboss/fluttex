@@ -1,13 +1,13 @@
 part of '../../common.dart';
 
-class HttpRequest extends Request<http.BaseResponse> {
-  HttpRequest({
-    required this.request,
+class QueryRequest extends Request<http.BaseResponse> {
+  QueryRequest({
+    required this.query,
     required this.fulfill,
     required this.reject,
   });
 
-  final http.BaseRequest request;
+  final String query;
 
   @override
   final FutureOr<void> Function(http.BaseResponse response) fulfill;

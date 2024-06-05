@@ -1,8 +1,4 @@
-import 'package:html_parser/html_element.dart';
-import 'package:html_parser/html_node_type.dart';
 import 'package:html_parser/html_parser.dart';
-import 'package:html_parser/html_text.dart';
-import 'package:html_parser/html_tokenizer.dart';
 import 'package:test/test.dart';
 
 void main() {

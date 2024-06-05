@@ -1,7 +1,4 @@
-import 'dart:collection';
-
-import 'package:html_parser/html_token.dart';
-import 'package:html_parser/html_token_type.dart';
+part of '../html_parser.dart';
 
 extension HtmlTokenQueueExtensions on Queue<HtmlToken> {
   HtmlToken removeToken(HtmlTokenType expected) {

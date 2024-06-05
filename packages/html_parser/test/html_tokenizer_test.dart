@@ -1,7 +1,5 @@
+import 'package:html_parser/html_parser.dart';
 import 'package:test/test.dart';
-import 'package:html_parser/html_token.dart';
-import 'package:html_parser/html_token_type.dart';
-import 'package:html_parser/html_tokenizer.dart';
 
 void main() {
   test('Tokenize empty string', () {

@@ -13,6 +13,11 @@ dependencies:
   smith:
     path: ../smith
 
+  http: ^1.2.1
+
+  html_parser:
+    path: ../html_parser
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -1,4 +1,4 @@
-import 'package:html_parser/html_node_type.dart';
+part of '../html_parser.dart';
 
 abstract class HtmlNode {
   const HtmlNode({

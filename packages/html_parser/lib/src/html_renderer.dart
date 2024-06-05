@@ -1,8 +1,4 @@
-import 'package:html_parser/html_document.dart';
-import 'package:html_parser/html_element.dart';
-import 'package:html_parser/html_error_node.dart';
-import 'package:html_parser/html_node.dart';
-import 'package:html_parser/html_text.dart';
+part of '../html_parser.dart';
 
 class HtmlRenderer {
   const HtmlRenderer();

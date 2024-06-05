@@ -19,7 +19,7 @@ class ErrorPageBuilder extends PageBuilder<ErrorPageInformation> {
             Icons.error,
             size: 64,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           Text(
             information.code,
             style: Theme.of(context).textTheme.labelMedium,

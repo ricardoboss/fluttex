@@ -1,3 +1,5 @@
+part of '../html_parser.dart';
+
 enum HtmlTokenType {
   text,
   whitespace,

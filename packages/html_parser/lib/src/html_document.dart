@@ -1,7 +1,4 @@
-import 'dart:collection';
-
-import 'package:html_parser/html_element.dart';
-import 'package:html_parser/html_node.dart';
+part of '../html_parser.dart';
 
 class HtmlDocument {
   HtmlDocument({
