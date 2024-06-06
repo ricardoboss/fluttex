@@ -7,7 +7,7 @@ import 'package:smith/smith.dart' as smith;
 void main() {
   smith.CommandHandler().register();
   flavio.PageBuilderRegistry.register();
-  bob.UrlResolver.register();
+  bob.QueryResolver.register();
   bob.Client.register();
 
   runApp(const FluttexApp());

@@ -66,7 +66,7 @@ class CommandHandler {
 
   void _onRequestFailed(Object? error) {
     _onShowErrorPage(
-      code: 'resolve-failed',
+      code: 'request-failed',
       error: error,
     );
   }

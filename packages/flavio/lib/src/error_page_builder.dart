@@ -24,6 +24,11 @@ class ErrorPageBuilder extends PageBuilder<ErrorPageInformation> {
             information.code,
             style: Theme.of(context).textTheme.labelMedium,
           ),
+          const SizedBox(height: 16),
+          Text(
+            information.error.toString(),
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
         ],
       ),
     );

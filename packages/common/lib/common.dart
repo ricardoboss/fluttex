@@ -21,5 +21,5 @@ part 'src/rendering/page_information.dart';
 part 'src/request_bus.dart';
 part 'src/requests/query_request.dart';
 part 'src/requests/request.dart';
-part 'src/requests/resolve_url_request.dart';
+part 'src/requests/resolve_query.dart';
 part 'src/ui_bus.dart';

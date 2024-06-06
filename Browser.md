@@ -57,6 +57,12 @@ sequenceDiagram
     Fluttex-->>User: Show updated favicon
 
     Smith->>+Bob: SendRequest
+    Bob-->>+Bob: ResolveQuery
+    Bob-->>-Bob: QueryResolved
+    Bob-->>+Bob: DNS Lookup
+    Bob-->>-Bob: DNS Response
+    Bob-->>+Bob: HTTP Request
+    Bob-->>-Bob: HTTP Response
     Bob-->>-Smith: RequestCompleted
 
     Smith->>+Flavio: DispatchBuilderEvent

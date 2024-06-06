@@ -1,7 +1,7 @@
 part of '../../common.dart';
 
-class ResolveUrlRequest extends Request<Uri> {
-  const ResolveUrlRequest({
+class ResolveQuery extends Request<Uri> {
+  const ResolveQuery({
     required this.query,
     required this.fulfill,
     required this.reject,
@@ -10,7 +10,7 @@ class ResolveUrlRequest extends Request<Uri> {
   final String query;
 
   @override
-  final FutureOr<void> Function(Uri response) fulfill;
+  final FutureOr<void> Function(Uri uri) fulfill;
 
   @override
   final FutureOr<void> Function(Object? error) reject;
