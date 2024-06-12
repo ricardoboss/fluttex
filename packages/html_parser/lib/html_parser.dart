@@ -2,6 +2,23 @@ library html_parser;
 
 import 'dart:collection';
 
+part 'src/elements/html_a_element.dart';
+part 'src/elements/html_article_element.dart';
+part 'src/elements/html_body_element.dart';
+part 'src/elements/html_button_element.dart';
+part 'src/elements/html_div_element.dart';
+part 'src/elements/html_footer_element.dart';
+part 'src/elements/html_h_element.dart';
+part 'src/elements/html_head_element.dart';
+part 'src/elements/html_header_element.dart';
+part 'src/elements/html_hr_element.dart';
+part 'src/elements/html_img_element.dart';
+part 'src/elements/html_input_element.dart';
+part 'src/elements/html_li_element.dart';
+part 'src/elements/html_ol_element.dart';
+part 'src/elements/html_p_element.dart';
+part 'src/elements/html_ul_element.dart';
+part 'src/html_comment_node.dart';
 part 'src/html_document.dart';
 part 'src/html_element.dart';
 part 'src/html_error_node.dart';
@@ -14,3 +31,4 @@ part 'src/html_token.dart';
 part 'src/html_token_queue_extensions.dart';
 part 'src/html_token_type.dart';
 part 'src/html_tokenizer.dart';
+part 'src/queue_extensions.dart';

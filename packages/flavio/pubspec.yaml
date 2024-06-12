@@ -17,6 +17,7 @@ dependencies:
 
   html_parser:
     path: ../html_parser
+  http_parser: ^4.0.2
 
 dev_dependencies:
   flutter_test:

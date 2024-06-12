@@ -7,7 +7,9 @@ import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 
 part 'src/command_bus.dart';
+part 'src/commands/back_command.dart';
 part 'src/commands/command.dart';
+part 'src/commands/forward_command.dart';
 part 'src/commands/navigate_command.dart';
 part 'src/commands/reload_command.dart';
 part 'src/events/dispatch_builder_event.dart';

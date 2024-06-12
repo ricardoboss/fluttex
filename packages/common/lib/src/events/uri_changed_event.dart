@@ -1,7 +1,7 @@
 part of '../../common.dart';
 
 class UriChangedEvent extends Event {
-  final Uri uri;
+  final String uri;
 
   const UriChangedEvent(this.uri);
 }

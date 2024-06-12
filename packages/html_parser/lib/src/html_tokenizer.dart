@@ -27,13 +27,23 @@ class HtmlTokenizer {
 
               state = _TokenizerState.tagName;
 
-              if (queue.isNotEmpty && queue.first == '/') {
+              if (queue.startsWith('/')) {
                 queue.removeFirst();
 
                 yield HtmlToken(HtmlTokenType.tagEndingOpen, '</');
+              } else if (queue.startsWith('!--')) {
+                queue.removeFirstEntries(3);
+
+                yield HtmlToken(HtmlTokenType.commentOpen, '<!--');
+
+                state = _TokenizerState.comment;
               } else {
                 yield HtmlToken(HtmlTokenType.tagOpen, '<');
               }
+
+              break;
+            case _TokenizerState.comment:
+              buffer.write(char);
 
               break;
             default:
@@ -65,6 +75,10 @@ class HtmlTokenizer {
 
               break;
             case _TokenizerState.attributeValue:
+              buffer.write(char);
+
+              break;
+            case _TokenizerState.comment:
               buffer.write(char);
 
               break;
@@ -107,6 +121,10 @@ class HtmlTokenizer {
               yield HtmlToken(HtmlTokenType.tagClose, '>');
 
               state = _TokenizerState.initial;
+
+              break;
+            case _TokenizerState.comment:
+              buffer.write(char);
 
               break;
             default:
@@ -155,6 +173,10 @@ class HtmlTokenizer {
               buffer.write(char);
 
               break;
+            case _TokenizerState.comment:
+              buffer.write(char);
+
+              break;
             default:
               throw UnimplementedError("Unexpected '/' in state $state");
           }
@@ -182,6 +204,10 @@ class HtmlTokenizer {
               break;
             case _TokenizerState.insideTag:
               yield HtmlToken(HtmlTokenType.whitespace, char);
+
+              break;
+            case _TokenizerState.comment:
+              buffer.write(char);
 
               break;
             default:
@@ -232,6 +258,25 @@ class HtmlTokenizer {
               buffer.write(char);
 
               break;
+            case _TokenizerState.comment:
+              if (char != '-' || !queue.startsWith('->')) {
+                buffer.write(char);
+
+                break;
+              }
+
+              queue.removeFirstEntries(2);
+
+              final comment = buffer.toString();
+              buffer.clear();
+
+              yield HtmlToken(HtmlTokenType.commentText, comment);
+
+              yield HtmlToken(HtmlTokenType.commentClose, '-->');
+
+              state = _TokenizerState.initial;
+
+              break;
             default:
               buffer.write(char);
 
@@ -250,4 +295,5 @@ enum _TokenizerState {
   insideTag,
   attributeName,
   attributeValue,
+  comment,
 }

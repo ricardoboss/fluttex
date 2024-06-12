@@ -46,7 +46,7 @@ class Client {
     _bussTlds.addAll(json.cast<String>());
   }
 
-  static Future<Uri> _transformUrl(Uri uri) async {
+  static Future<(Uri, MediaType?)> _resolveUrl(Uri uri) async {
     await _loadBussTlds();
 
     final tld = uri.host.split('.').last;
@@ -54,7 +54,7 @@ class Client {
     if (!_bussTlds.contains(tld)) {
       uri = uri.replace(scheme: 'https');
 
-      return uri;
+      return (uri, null);
     }
 
     // TODO: support subdomains
@@ -80,23 +80,37 @@ class Client {
     if (maybeGitHubUri != null) {
       assert(maybeGitHubUri.host == 'github.com');
 
-      return maybeGitHubUri;
+      final githubUser = maybeGitHubUri.pathSegments[0];
+      final githubRepo = maybeGitHubUri.pathSegments[1];
+      final originalPath = uri.path.isEmpty ? 'index.html' : uri.path;
+
+      final rawContentUrl =
+          'https://raw.githubusercontent.com/$githubUser/$githubRepo/main/$originalPath';
+
+      return (Uri.parse(rawContentUrl), MediaType.parse('text/html'));
     }
 
     // TODO: check if this is correct
     final ip = InternetAddress(target);
 
-    return uri.replace(scheme: 'https', host: ip.address);
+    return (uri.replace(scheme: 'https', host: ip.address), null);
   }
 
   static Future<void> _onQueryResolved(
     QueryRequest request,
     Uri url,
-  ) async {}
+  ) async {
+    uiBus.fire(UriChangedEvent(url.toString()));
+
+    final (resolvedUrl, expectedMediaType) = await _resolveUrl(url);
+
+    _onDnsResolved(request, resolvedUrl, expectedMediaType);
+  }
 
   static Future<void> _onDnsResolved(
     QueryRequest request,
     Uri uri,
+    MediaType? expectedMediaType,
   ) async {
     final http.BaseResponse response;
 
@@ -108,6 +122,10 @@ class Client {
       return;
     }
 
+    if (expectedMediaType != null && response.headers['content-type'] != expectedMediaType.mimeType) {
+      response.headers['content-type'] = expectedMediaType.mimeType;
+    }
+
     request.fulfill(response);
   }
 
@@ -117,7 +135,10 @@ class Client {
   }) async {
     return await client.get(
       uri,
-      headers: headers,
+      headers: {
+        ...?headers,
+        'User-Agent': _userAgent,
+      },
     );
   }
 }

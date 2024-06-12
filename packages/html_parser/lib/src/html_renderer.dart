@@ -6,7 +6,7 @@ class HtmlRenderer {
   String render(HtmlDocument document) {
     final buffer = StringBuffer();
 
-    for (var node in document.nodes) {
+    for (var node in document.children) {
       buffer.writeln(renderNode(node));
     }
 

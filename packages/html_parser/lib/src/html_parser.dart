@@ -28,7 +28,7 @@ class HtmlParser {
 
     final nodes = parseTokens(tokens).toList(growable: false);
 
-    return HtmlDocument(nodes: nodes);
+    return HtmlDocument(children: nodes);
   }
 
   Iterable<HtmlNode> parseTokens(Iterable<HtmlToken> tokens) sync* {
@@ -83,11 +83,134 @@ class HtmlParser {
             break;
           }
 
-          yield HtmlElement(
-            tagName: tagName,
-            attributes: attributes,
-            children: children,
-          );
+          switch (tagName) {
+            case 'body':
+              yield HtmlBodyElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'head':
+              yield HtmlHeadElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'div':
+              yield HtmlDivElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'hr':
+              yield HtmlHrElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'h1':
+            case 'h2':
+            case 'h3':
+            case 'h4':
+            case 'h5':
+            case 'h6':
+              yield HtmlHElement(
+                level: int.parse(tagName.substring(1)),
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'p':
+              yield HtmlPElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'input':
+              yield HtmlInputElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'img':
+              yield HtmlImgElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'button':
+              yield HtmlButtonElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'a':
+              yield HtmlAElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'header':
+              yield HtmlHeaderElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'article':
+              yield HtmlArticleElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'footer':
+              yield HtmlFooterElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'li':
+              yield HtmlLiElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'ol':
+              yield HtmlOlElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'ul':
+              yield HtmlUlElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            default:
+              yield HtmlElement(
+                tagName: tagName,
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+          }
 
           break;
         case HtmlTokenType.tagEndingOpen:
@@ -120,6 +243,13 @@ class HtmlParser {
           }
 
           return;
+        case HtmlTokenType.commentOpen:
+          final comment = queue.removeToken(HtmlTokenType.commentText).text;
+          queue.removeToken(HtmlTokenType.commentClose);
+
+          yield HtmlCommentNode(comment: comment);
+
+          break;
         default:
           yield HtmlErrorNode(message: 'Unexpected token type ${token.type}');
 

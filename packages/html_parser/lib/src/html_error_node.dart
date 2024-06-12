@@ -12,7 +12,7 @@ class HtmlErrorNode extends HtmlNode {
   String toString() => 'HtmlErrorNode(message: $message)';
 
   @override
-  String get text => "<!-- $message -->";
+  String get text => "[$message]";
 
   @override
   HtmlNode withParent(HtmlNode? parent) {

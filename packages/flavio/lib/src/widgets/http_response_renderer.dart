@@ -23,6 +23,6 @@ class HttpResponseRenderer extends StatelessWidget {
   Widget _renderHtml(BuildContext context) {
     final document = HtmlParser().parse(responseBody.toString());
 
-    return HtmlDocumentRenderer(document: document);
+    return HtmlDocumentRenderer(document: document, response: response);
   }
 }

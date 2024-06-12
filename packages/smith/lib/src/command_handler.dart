@@ -1,17 +1,24 @@
 part of '../smith.dart';
 
 class CommandHandler {
-  String? _lastQuery;
+  final List<String> _queryHistory = [];
+  int _historyOffset = 0;
+
+  String get lastQuery =>
+      _queryHistory.elementAt(_historyOffset);
 
   void register() {
     commandBus.on<ReloadCommand>().listen(_onReload);
     commandBus.on<NavigateCommand>().listen(_onNavigate);
+    commandBus.on<BackCommand>().listen(_onBack);
+    commandBus.on<ForwardCommand>().listen(_onForward);
   }
 
   void _onNavigate(NavigateCommand event) {
-    _dispatchLoading();
+    _dispatchLoading(event.query);
 
-    _lastQuery = event.query;
+    _queryHistory.insert(0, event.query);
+    _historyOffset = 0;
 
     requestBus.fire(QueryRequest(
       query: event.query,
@@ -21,24 +28,54 @@ class CommandHandler {
   }
 
   void _onReload(ReloadCommand event) {
-    if (_lastQuery == null) {
+    if (_queryHistory.isEmpty) {
       return;
     }
 
-    _dispatchLoading();
+    _dispatchLoading(lastQuery);
 
     requestBus.fire(QueryRequest(
-      query: _lastQuery!,
+      query: lastQuery,
       fulfill: _onResponse,
       reject: _onRequestFailed,
     ));
   }
 
-  void _dispatchLoading({
-    Uri? uri,
-  }) {
-    if (uri != null) {
-      uiBus.fire(UriChangedEvent(uri));
+  void _onBack(BackCommand event) {
+    if (_historyOffset == _queryHistory.length) {
+      return;
+    }
+
+    _historyOffset++;
+
+    _dispatchLoading(lastQuery);
+
+    requestBus.fire(QueryRequest(
+      query: lastQuery,
+      fulfill: _onResponse,
+      reject: _onRequestFailed,
+    ));
+  }
+
+  void _onForward(ForwardCommand event) {
+    if (_historyOffset == 0) {
+      return;
+    }
+
+    _historyOffset--;
+
+    _dispatchLoading(lastQuery);
+
+    requestBus.fire(QueryRequest(
+      query: lastQuery,
+      fulfill: _onResponse,
+      reject: _onRequestFailed,
+    ));
+  }
+
+  void _dispatchLoading([String? query]) {
+    if (query != null) {
+      uiBus.fire(UriChangedEvent(query));
     }
 
     uiBus.fire(TitleChangedEvent('Loading...'));

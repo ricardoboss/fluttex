@@ -3,17 +3,12 @@ part of '../../flavio.dart';
 class HtmlBodyRenderer extends StatelessWidget {
   const HtmlBodyRenderer({
     super.key,
-    required this.body,
+    required this.element,
   });
 
-  final HtmlElement body;
+  final HtmlBodyElement element;
 
   @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        body.text,
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      HtmlNodesRenderer(nodes: element.children);
 }

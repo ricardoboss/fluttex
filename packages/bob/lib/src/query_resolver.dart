@@ -32,7 +32,11 @@ class QueryResolver {
       return _openInSearch(query);
     }
 
-    Uri uri = Uri.parse('//$query');
+    Uri uri = Uri.parse(query);
+    if (uri.path == query) {
+      uri = Uri.parse('//$query');
+    }
+
     if (uri.scheme.isNotEmpty && !_supportedSchemes.contains(uri.scheme)) {
       return _openInSearch(query);
     }

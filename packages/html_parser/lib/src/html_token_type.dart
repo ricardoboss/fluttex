@@ -3,6 +3,9 @@ part of '../html_parser.dart';
 enum HtmlTokenType {
   text,
   whitespace,
+  commentOpen,
+  commentText,
+  commentClose,
   tagOpen,
   tagEndingOpen,
   tagName,
@@ -15,6 +18,7 @@ enum HtmlTokenType {
         HtmlTokenType.text,
         HtmlTokenType.whitespace,
         HtmlTokenType.tagOpen,
+        HtmlTokenType.commentOpen,
       ].contains(this);
 
   bool get isTagClosing => [

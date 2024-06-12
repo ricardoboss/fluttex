@@ -21,6 +21,7 @@ class _BrowserUiState extends State<BrowserUi> {
 
   String? _title;
   Widget Function(BuildContext context)? _faviconBuilder;
+  Key? _pageKey;
   PageBuilder? _pageBuilder;
 
   @override
@@ -47,7 +48,7 @@ class _BrowserUiState extends State<BrowserUi> {
 
   void _onUriChanged(UriChangedEvent event) {
     setState(() {
-      _uriController.text = event.uri.toString();
+      _uriController.text = event.uri;
     });
   }
 
@@ -65,6 +66,7 @@ class _BrowserUiState extends State<BrowserUi> {
 
   void _onRenderPage(RenderPageEvent event) {
     setState(() {
+      _pageKey = UniqueKey();
       _pageBuilder = event.builder;
     });
   }
@@ -82,6 +84,16 @@ class _BrowserUiState extends State<BrowserUi> {
                 child: Row(
                   children: [
                     _buildTab(context),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () => commandBus.fire(const BackCommand()),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.arrow_forward),
+                      onPressed: () => commandBus.fire(const ForwardCommand()),
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: TextFormField(
@@ -111,6 +123,7 @@ class _BrowserUiState extends State<BrowserUi> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(6),
                   child: Builder(
+                    key: _pageKey,
                     builder: (c) {
                       if (_pageBuilder != null) {
                         return _pageBuilder!.buildPage(c);
