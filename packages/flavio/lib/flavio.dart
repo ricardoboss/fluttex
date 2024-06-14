@@ -15,6 +15,7 @@ part 'src/html_context.dart';
 part 'src/http_response_page_builder.dart';
 part 'src/page_builder_registry.dart';
 part 'src/placeholder_page_builder.dart';
+part 'src/widgets/code_renderer.dart';
 part 'src/widgets/html_a_renderer.dart';
 part 'src/widgets/html_article_renderer.dart';
 part 'src/widgets/html_body_renderer.dart';

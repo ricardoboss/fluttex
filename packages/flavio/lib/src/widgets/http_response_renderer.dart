@@ -29,7 +29,14 @@ class HttpResponseRenderer extends StatelessWidget {
         child: switch (contentType?.type) {
           'text' => switch (contentType?.subtype) {
             'html' => _renderHtml(context),
+            'css' => _renderCode(context),
             _ => _renderText(context),
+          },
+          'application' => switch (contentType?.subtype) {
+            'javascript' => _renderCode(context),
+            'lua' => _renderCode(context),
+            'json' => _renderCode(context),
+            _ => _renderUnsupportedContentType(context),
           },
           _ => _renderUnsupportedContentType(context),
         },
@@ -49,5 +56,12 @@ class HttpResponseRenderer extends StatelessWidget {
 
   Widget _renderUnsupportedContentType(BuildContext context) {
     return UnsupportedContentTypeRenderer(contentType: contentType);
+  }
+
+  Widget _renderCode(BuildContext context) {
+    return CodeRenderer(
+      filename: response.request!.url.pathSegments.last,
+      sourceCode: responseBody.toString(),
+    );
   }
 }
