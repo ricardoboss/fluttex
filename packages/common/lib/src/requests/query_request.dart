@@ -5,9 +5,13 @@ class QueryRequest extends Request<http.BaseResponse> {
     required this.query,
     required this.fulfill,
     required this.reject,
+    this.contentTypeHint,
+    this.baseUrl,
   });
 
   final String query;
+  final MediaType? contentTypeHint;
+  final String? baseUrl;
 
   @override
   final FutureOr<void> Function(http.BaseResponse response) fulfill;

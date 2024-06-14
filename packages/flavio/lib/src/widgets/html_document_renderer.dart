@@ -46,11 +46,35 @@ class _HtmlDocumentRendererState extends State<HtmlDocumentRenderer> {
     }
     uiBus.fire(FaviconChangedEvent((c) => favicon));
 
-    // todo fire events for resources (style, script)
+    await _processStyleSheets();
+
+    // don't block rendering for scripts
+    unawaited(_processScripts());
+  }
+
+  Future<void> _processStyleSheets() async {
+    final styleSheetLinks = widget.document.head?.findAllTags(
+          'link',
+          (l) => l.attributes['href']?.endsWith('.css') ?? false,
+        ) ??
+        <HtmlElement>[];
+
+    for (final link in styleSheetLinks) {
+      final href = link.attributes['href'];
+
+      assert(href != null, 'Style sheet link has no href');
+
+      debugPrint('Loading style sheet: $href');
+    }
+  }
+
+  Future<void> _processScripts() async {
+    // TODO(ricardoboss): implement
   }
 
   String _getTitle(HtmlDocument document) {
-    final title = document.findFirstTag('title')?.text ?? 'Untitled Document';
+    final title =
+        document.head?.findFirstTag('title')?.text ?? 'Untitled Document';
 
     return title;
   }
@@ -58,14 +82,15 @@ class _HtmlDocumentRendererState extends State<HtmlDocumentRenderer> {
   Uri? _getFaviconUri(HtmlDocument document) {
     final available = <(MediaType, Uri)>[];
 
-    for (final link in document.head!.findAllTags(
-      'link',
-      (l) => [
-        'icon',
-        'shortcut icon',
-        'apple-touch-icon',
-      ].contains(l.attributes['rel']),
-    )) {
+    for (final link in document.head?.findAllTags(
+          'link',
+          (l) => [
+            'icon',
+            'shortcut icon',
+            'apple-touch-icon',
+          ].contains(l.attributes['rel']),
+        ) ??
+        <HtmlElement>[]) {
       final href = link.attributes['href'];
       if (href == null) {
         continue;

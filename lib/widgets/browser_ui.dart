@@ -145,7 +145,7 @@ class _BrowserUiState extends State<BrowserUi> {
     return DecoratedBox(
       decoration: BoxDecoration(
         border: Border.all(
-          color: Theme.of(context).colorScheme.onBackground,
+          color: Theme.of(context).colorScheme.onSurface,
           width: 0.5,
         ),
         borderRadius: BorderRadius.circular(8),

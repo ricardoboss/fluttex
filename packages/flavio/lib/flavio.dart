@@ -1,5 +1,6 @@
 library flavio;
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:common/common.dart';
@@ -33,3 +34,5 @@ part 'src/widgets/html_nodes_renderer.dart';
 part 'src/widgets/html_p_renderer.dart';
 part 'src/widgets/http_response_renderer.dart';
 part 'src/widgets/streamed_response_body.dart';
+part 'src/widgets/text_document_renderer.dart';
+part 'src/widgets/unsupported_content_type_renderer.dart';

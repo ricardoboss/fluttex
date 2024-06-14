@@ -93,8 +93,7 @@ class CommandHandler {
     final uri = response.request!.url;
 
     final information = HttpResponsePageInformation(
-      // TODO: only override content-type for text/plain from raw.githubusercontent.com
-      response: response..headers['content-type'] = 'text/html',
+      response: response,
       uri: uri,
     );
 
@@ -130,12 +129,6 @@ class CommandHandler {
       child: const Icon(Icons.error),
     );
   }
-}
-
-class _CurrentPage {
-  _CurrentPage({required this.uri});
-
-  final Uri uri;
 }
 
 class ErrorPageInformation extends PageInformation {

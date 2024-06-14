@@ -10,19 +10,44 @@ class HttpResponseRenderer extends StatelessWidget {
   final http.BaseResponse response;
   final StringBuffer responseBody;
 
-  String? get contentType => response.headers['content-type']?.split(';').first;
+  MediaType? get contentType {
+    final contentTypeWithEncoding = response.headers['content-type'];
+    if (contentTypeWithEncoding == null) {
+      return null;
+    }
+
+    final contentType = contentTypeWithEncoding.split(';').first;
+
+    return MediaType.parse(contentType);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return switch (contentType) {
-      'text/html' => _renderHtml(context),
-      _ => const Text('Unsupported content type'),
-    };
+    return SingleChildScrollView(
+      child: SizedBox(
+        width: double.infinity,
+        child: switch (contentType?.type) {
+          'text' => switch (contentType?.subtype) {
+            'html' => _renderHtml(context),
+            _ => _renderText(context),
+          },
+          _ => _renderUnsupportedContentType(context),
+        },
+      ),
+    );
   }
 
   Widget _renderHtml(BuildContext context) {
     final document = HtmlParser().parse(responseBody.toString());
 
     return HtmlDocumentRenderer(document: document, response: response);
+  }
+
+  Widget _renderText(BuildContext context) {
+    return TextDocumentRenderer(text: responseBody.toString());
+  }
+
+  Widget _renderUnsupportedContentType(BuildContext context) {
+    return UnsupportedContentTypeRenderer(contentType: contentType);
   }
 }
