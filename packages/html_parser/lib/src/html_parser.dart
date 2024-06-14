@@ -202,6 +202,13 @@ class HtmlParser {
               );
 
               break;
+            case 'br':
+              yield HtmlBrElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
             default:
               yield HtmlElement(
                 tagName: tagName,

@@ -35,6 +35,8 @@ class HtmlNodeRenderer extends StatelessWidget {
         return HtmlArticleRenderer(element: article);
       case final HtmlFooterElement footer:
         return HtmlFooterRenderer(element: footer);
+      case final HtmlBrElement br:
+        return HtmlBrRenderer(element: br);
       case final HtmlErrorNode errorNode:
         return ErrorWidget(errorNode.message);
       case final HtmlElement element:

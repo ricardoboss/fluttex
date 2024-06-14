@@ -5,6 +5,7 @@ import 'dart:collection';
 part 'src/elements/html_a_element.dart';
 part 'src/elements/html_article_element.dart';
 part 'src/elements/html_body_element.dart';
+part 'src/elements/html_br_element.dart';
 part 'src/elements/html_button_element.dart';
 part 'src/elements/html_div_element.dart';
 part 'src/elements/html_footer_element.dart';

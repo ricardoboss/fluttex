@@ -17,6 +17,7 @@ part 'src/placeholder_page_builder.dart';
 part 'src/widgets/html_a_renderer.dart';
 part 'src/widgets/html_article_renderer.dart';
 part 'src/widgets/html_body_renderer.dart';
+part 'src/widgets/html_br_renderer.dart';
 part 'src/widgets/html_button_renderer.dart';
 part 'src/widgets/html_context_widget.dart';
 part 'src/widgets/html_div_renderer.dart';
