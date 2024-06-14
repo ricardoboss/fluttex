@@ -76,21 +76,26 @@ class Client {
       _bussDnsCache[cacheKey] = target;
     }
 
-    final maybeGitHubUri = Uri.tryParse(target);
-    if (maybeGitHubUri != null) {
-      assert(maybeGitHubUri.host == 'github.com');
+    final url = Uri.tryParse(target);
 
-      final githubUser = maybeGitHubUri.pathSegments[0];
-      final githubRepo = maybeGitHubUri.pathSegments[1];
-      final originalPath = uri.path.isEmpty ? 'index.html' : uri.path;
+    // When the target is an IP address, the path is the same as target
+    if (url != null && url.path != target) {
+      if (url.host == 'github.com') {
+        final githubUser = url.pathSegments[0];
+        final githubRepo = url.pathSegments[1];
+        final originalPath = uri.path.isEmpty ? 'index.html' : uri.path;
 
-      final rawContentUrl =
-          'https://raw.githubusercontent.com/$githubUser/$githubRepo/main/$originalPath';
+        final rawContentUrl =
+            'https://raw.githubusercontent.com/$githubUser/$githubRepo/main/$originalPath';
 
-      return (Uri.parse(rawContentUrl), MediaType.parse('text/html'));
+        return (Uri.parse(rawContentUrl), MediaType.parse('text/html'));
+      } else {
+        final path = uri.path.isEmpty ? 'index.html' : uri.path;
+
+        return (url.replace(path: path), null);
+      }
     }
 
-    // TODO: check if this is correct
     final ip = InternetAddress(target);
 
     return (uri.replace(scheme: 'https', host: ip.address), null);
@@ -122,7 +127,8 @@ class Client {
       return;
     }
 
-    if (expectedMediaType != null && response.headers['content-type'] != expectedMediaType.mimeType) {
+    if (expectedMediaType != null &&
+        response.headers['content-type'] != expectedMediaType.mimeType) {
       response.headers['content-type'] = expectedMediaType.mimeType;
     }
 
