@@ -10,6 +10,8 @@ class HttpResponseRenderer extends StatelessWidget {
   final http.BaseResponse response;
   final StringBuffer responseBody;
 
+  Uri? get requestUri => response.request?.url;
+
   MediaType? get contentType {
     final contentTypeWithEncoding = response.headers['content-type'];
     if (contentTypeWithEncoding == null) {
@@ -17,8 +19,18 @@ class HttpResponseRenderer extends StatelessWidget {
     }
 
     final contentType = contentTypeWithEncoding.split(';').first;
+    MediaType? mediaType = MediaType.parse(contentType);
 
-    return MediaType.parse(contentType);
+    // special handling for raw files served from github
+    if (requestUri != null &&
+        requestUri!.host == 'raw.githubusercontent.com' &&
+        contentType == 'text/plain') {
+      mediaType = guessContentTypeByExtension(
+        requestUri!.pathSegments.last.split('.').last,
+      );
+    }
+
+    return mediaType;
   }
 
   @override
@@ -28,16 +40,17 @@ class HttpResponseRenderer extends StatelessWidget {
         width: double.infinity,
         child: switch (contentType?.type) {
           'text' => switch (contentType?.subtype) {
-            'html' => _renderHtml(context),
-            'css' => _renderCode(context),
-            _ => _renderText(context),
-          },
+              'html' => _renderHtml(context),
+              'css' => _renderCode(context),
+              _ => _renderText(context),
+            },
           'application' => switch (contentType?.subtype) {
-            'javascript' => _renderCode(context),
-            'lua' => _renderCode(context),
-            'json' => _renderCode(context),
-            _ => _renderUnsupportedContentType(context),
-          },
+              'javascript' => _renderCode(context),
+              'lua' => _renderCode(context),
+              'json' => _renderCode(context),
+              _ => _renderUnsupportedContentType(context),
+            },
+          null => _renderText(context),
           _ => _renderUnsupportedContentType(context),
         },
       ),
@@ -60,7 +73,7 @@ class HttpResponseRenderer extends StatelessWidget {
 
   Widget _renderCode(BuildContext context) {
     return CodeRenderer(
-      filename: response.request!.url.pathSegments.last,
+      filename: requestUri!.pathSegments.last,
       sourceCode: responseBody.toString(),
     );
   }

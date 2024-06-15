@@ -33,5 +33,16 @@ class _TextDocumentRendererState extends State<TextDocumentRenderer> {
   }
 
   @override
-  Widget build(BuildContext context) => Text(widget.text);
+  Widget build(BuildContext context) => Text(
+        style: TextStyle(
+          fontFamily: 'JetBrains Mono',
+          fontFamilyFallback: [
+            'Menlo',
+            'Consolas',
+            'monospace',
+          ],
+          fontSize: 14,
+        ),
+        widget.text,
+      );
 }

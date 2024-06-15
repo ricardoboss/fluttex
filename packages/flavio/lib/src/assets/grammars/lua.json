@@ -1,0 +1,94 @@
+{
+  "name": "Lua",
+  "version": "1.0.0",
+  "fileTypes": [
+    "lua"
+  ],
+  "scopeName": "source.lua",
+
+  "foldingStartMarker": "\\{\\s*$",
+  "foldingStopMarker": "^\\s*\\}",
+
+  "patterns": [
+    {
+      "name": "comment.line.double-dash.lua",
+      "match": "--.*$"
+    },
+    {
+      "name": "comment.block.lua",
+      "begin": "--\\[\\[",
+      "end": "\\]\\]"
+    },
+    {
+      "name": "string.quoted.double.lua",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.lua",
+          "match": "\\\\."
+        }
+      ]
+    },
+    {
+      "name": "string.quoted.single.lua",
+      "begin": "'",
+      "end": "'",
+      "patterns": [
+        {
+          "name": "constant.character.escape.lua",
+          "match": "\\\\."
+        }
+      ]
+    },
+    {
+      "name": "string.block.lua",
+      "begin": "\\[\\[",
+      "end": "\\]\\]"
+    },
+    {
+      "name": "constant.numeric.lua",
+      "match": "\\b\\d+\\.?\\d*\\b"
+    },
+    {
+      "name": "keyword.control.lua",
+      "match": "\\b(if|then|else|elseif|end|for|in|while|repeat|until|do|return|break|local|function)\\b"
+    },
+    {
+      "name": "keyword.operator.lua",
+      "match": "\\b(and|or|not)\\b"
+    },
+    {
+      "name": "keyword.operator.assignment.lua",
+      "match": "="
+    },
+    {
+      "name": "keyword.operator.arithmetic.lua",
+      "match": "[+-/*%^#]"
+    },
+    {
+      "name": "keyword.operator.comparison.lua",
+      "match": "[<>~=]=?"
+    },
+    {
+      "name": "keyword.operator.logical.lua",
+      "match": "[!&|]"
+    },
+    {
+      "name": "variable.language.lua",
+      "match": "\\b(_G|_VERSION)\\b"
+    },
+    {
+      "name": "support.function.lua",
+      "match": "\\b(print|pairs|ipairs|next|tonumber|tostring|type|unpack|coroutine|module|require|package|debug|io|os|math|string|table)\\b"
+    },
+    {
+      "name": "punctuation.separator.lua",
+      "match": "[,;]"
+    },
+    {
+      "name": "punctuation.bracket.lua",
+      "match": "[\\[\\]{}()]"
+    }
+  ]
+}

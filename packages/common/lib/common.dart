@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
 part 'src/command_bus.dart';
+part 'src/media_type_by_extension.dart';
 part 'src/commands/back_command.dart';
 part 'src/commands/command.dart';
 part 'src/commands/forward_command.dart';

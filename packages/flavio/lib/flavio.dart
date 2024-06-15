@@ -5,10 +5,12 @@ import 'dart:convert';
 
 import 'package:common/common.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:html_parser/html_parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:smith/smith.dart';
+import 'package:syntax_highlight/syntax_highlight.dart';
 
 part 'src/error_page_builder.dart';
 part 'src/html_context.dart';
