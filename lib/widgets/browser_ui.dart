@@ -95,6 +95,11 @@ class _BrowserUiState extends State<BrowserUi> {
                       onPressed: () => commandBus.fire(const ForwardCommand()),
                     ),
                     const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.refresh),
+                      onPressed: () => commandBus.fire(const ReloadCommand()),
+                    ),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: TextFormField(
                         controller: _uriController,
@@ -109,11 +114,6 @@ class _BrowserUiState extends State<BrowserUi> {
                         },
                         textInputAction: TextInputAction.go,
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      icon: const Icon(Icons.refresh),
-                      onPressed: () => commandBus.fire(const ReloadCommand()),
                     ),
                   ],
                 ),
@@ -164,8 +164,12 @@ class _BrowserUiState extends State<BrowserUi> {
           ),
           Padding(
             padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, right: 8.0),
-            child: Text(
-              _title ?? 'Untitled',
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 250),
+              child: Text(
+                _title ?? 'Untitled',
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ),
         ],
