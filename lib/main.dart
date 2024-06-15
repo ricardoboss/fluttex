@@ -5,7 +5,7 @@ import 'package:fluttex/fluttex_app.dart';
 import 'package:smith/smith.dart' as smith;
 
 void main() {
-  smith.CommandHandler().register();
+  smith.CommandHandler.register();
   flavio.PageBuilderRegistry.register();
   bob.QueryResolver.register();
   bob.Client.register();
