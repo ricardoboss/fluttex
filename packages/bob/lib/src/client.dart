@@ -5,6 +5,7 @@ class Client {
 
   static void register() {
     requestBus.on<QueryRequest>().listen(_onQueryRequest);
+    requestBus.on<ResourceRequest>().listen(_onResourceRequest);
   }
 
   static const _userAgent =
@@ -36,7 +37,7 @@ class Client {
       return;
     }
 
-    final response = await client.get(
+    final response = await _get(
       Uri.parse('https://api.buss.lol/tlds'),
       headers: {'Accept': 'application/json'},
     );
@@ -117,11 +118,15 @@ class Client {
 
     final (resolvedUrl, expectedMediaType) = await _resolveUrl(url);
 
-    _onDnsResolved(request, resolvedUrl, expectedMediaType);
+    await _onDnsResolved(request, resolvedUrl, expectedMediaType);
+  }
+
+  static Future<void> _onResourceRequest(ResourceRequest request) async {
+    await _onDnsResolved(request, request.uri, request.contentTypeHint);
   }
 
   static Future<void> _onDnsResolved(
-    QueryRequest request,
+    Request<http.BaseResponse> request,
     Uri uri,
     MediaType? expectedMediaType,
   ) async {
@@ -130,7 +135,7 @@ class Client {
     try {
       response = await _get(uri);
     } catch (e) {
-      request.reject(e);
+      await request.reject(e);
 
       return;
     }
@@ -140,7 +145,7 @@ class Client {
       response.headers['content-type'] = expectedMediaType.mimeType;
     }
 
-    request.fulfill(response);
+    await request.fulfill(response);
   }
 
   static Future<http.Response> _get(
