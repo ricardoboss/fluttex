@@ -14,14 +14,17 @@ const kDefaultSelfClosingTags = [
   'source',
   'track',
   'wbr',
+  '!DOCTYPE',
 ];
 
 class HtmlParser {
   const HtmlParser({
     this.selfClosingTags = kDefaultSelfClosingTags,
+    this.emitErrorNodes = true,
   });
 
   final List<String> selfClosingTags;
+  final bool emitErrorNodes;
 
   HtmlDocument parse(String html) {
     final tokens = HtmlTokenizer().tokenize(html);
@@ -54,7 +57,9 @@ class HtmlParser {
           final attributes = _parseAttributes(queue);
 
           if (queue.isEmpty) {
-            yield HtmlErrorNode(message: 'Missing tag closing');
+            if (emitErrorNodes) {
+              yield HtmlErrorNode(message: 'Missing tag closing');
+            }
 
             break;
           }
@@ -76,9 +81,11 @@ class HtmlParser {
 
             children = const [];
           } else {
-            yield HtmlErrorNode(
-              message: 'Unexpected token type ${queue.first.type}',
-            );
+            if (emitErrorNodes) {
+              yield HtmlErrorNode(
+                message: 'Unexpected token type ${queue.first.type}',
+              );
+            }
 
             break;
           }
@@ -222,13 +229,17 @@ class HtmlParser {
           break;
         case HtmlTokenType.tagEndingOpen:
           if (bailOnTagEnd == null) {
-            yield HtmlErrorNode(message: 'Unexpected tag ending');
+            if (emitErrorNodes) {
+              yield HtmlErrorNode(message: 'Unexpected tag ending');
+            }
 
             break;
           }
 
           if (queue.isEmpty) {
-            yield HtmlErrorNode(message: 'Missing tag name in tag ending');
+            if (emitErrorNodes) {
+              yield HtmlErrorNode(message: 'Missing tag name in tag ending');
+            }
 
             break;
           }
@@ -236,7 +247,11 @@ class HtmlParser {
           final tagName = queue.removeToken(HtmlTokenType.tagName).text;
 
           if (queue.isEmpty) {
-            yield HtmlErrorNode(message: 'Missing tag closing');
+            if (emitErrorNodes) {
+              yield HtmlErrorNode(
+                message: 'Missing tag closing for <$tagName>',
+              );
+            }
 
             break;
           }
@@ -244,7 +259,11 @@ class HtmlParser {
           queue.removeToken(HtmlTokenType.tagClose);
 
           if (tagName != bailOnTagEnd) {
-            yield HtmlErrorNode(message: 'Unexpected tag name in tag ending');
+            if (emitErrorNodes) {
+              yield HtmlErrorNode(
+                message: 'Unexpected </$tagName> when expecting </$bailOnTagEnd>',
+              );
+            }
 
             break;
           }
@@ -258,7 +277,9 @@ class HtmlParser {
 
           break;
         default:
-          yield HtmlErrorNode(message: 'Unexpected token type ${token.type}');
+          if (emitErrorNodes) {
+            yield HtmlErrorNode(message: 'Unexpected token type ${token.type}');
+          }
 
           while (queue.isNotEmpty && !queue.first.type.isValidInitializer) {
             queue.removeFirst();

@@ -59,7 +59,8 @@ class HttpResponseRenderer extends StatelessWidget {
   }
 
   Widget _renderHtml(BuildContext context) {
-    final document = HtmlParser().parse(body);
+    // TODO(ricardoboss): only enable error nodes when dev tools are open
+    final document = HtmlParser(emitErrorNodes: true).parse(body);
 
     return HtmlDocumentRenderer(document: document, response: response);
   }

@@ -38,9 +38,21 @@ class HtmlNodeRenderer extends StatelessWidget {
       case final HtmlBrElement br:
         return HtmlBrRenderer(element: br);
       case final HtmlErrorNode errorNode:
-        return ErrorWidget(errorNode.message);
+        return Text(
+          errorNode.message,
+          style: TextStyle(
+            color: Colors.yellow,
+            backgroundColor: Colors.red,
+            fontWeight: FontWeight.bold,
+          ),
+        );
       case final HtmlElement element:
-        return Text('Unimplemented element: ${element.tagName}');
+        return Text(
+          'Unimplemented element: ${element.tagName}',
+          style: TextStyle(
+            color: Color(0x88888888),
+          ),
+        );
       case final HtmlText textNode:
         if (textNode.text.trim().isEmpty) {
           return const SizedBox.shrink();

@@ -87,6 +87,10 @@ class HtmlTokenizer {
           }
         case '>':
           switch (state) {
+            case _TokenizerState.initial:
+              buffer.write(char);
+
+              break;
             case _TokenizerState.tagName:
               if (buffer.isEmpty) {
                 throw Exception('Empty tag name');
