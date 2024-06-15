@@ -27,6 +27,19 @@ class _HtmlDocumentRendererState extends State<HtmlDocumentRenderer> {
       const Duration(milliseconds: 200),
       _processDocument,
     );
+
+    _styleController.addListener(_onStyleChanged);
+  }
+
+  @override
+  dispose() {
+    _styleController.dispose();
+
+    super.dispose();
+  }
+
+  void _onStyleChanged() {
+    setState(() {});
   }
 
   Future<HtmlBodyElement> _processDocument() async {
@@ -39,6 +52,15 @@ class _HtmlDocumentRendererState extends State<HtmlDocumentRenderer> {
     final title = _getTitle(widget.document);
     uiBus.fire(TitleChangedEvent(title));
 
+    await _processFavicon();
+
+    await _processStyleSheets();
+
+    // don't block rendering for scripts
+    unawaited(_processScripts());
+  }
+
+  Future<void> _processFavicon() async {
     final Widget favicon;
     final faviconUrl = _getFaviconUri(widget.document);
     if (faviconUrl != null) {
@@ -46,12 +68,8 @@ class _HtmlDocumentRendererState extends State<HtmlDocumentRenderer> {
     } else {
       favicon = const Icon(Icons.text_snippet_outlined);
     }
+
     uiBus.fire(FaviconChangedEvent((c) => favicon));
-
-    await _processStyleSheets();
-
-    // don't block rendering for scripts
-    unawaited(_processScripts());
   }
 
   Future<void> _processStyleSheets() async {
