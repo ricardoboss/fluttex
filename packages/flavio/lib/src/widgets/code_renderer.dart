@@ -13,6 +13,8 @@ class CodeRenderer extends StatefulWidget {
   // TODO(ricardoboss): improve language detection
   String get language => filename.split('.').last;
 
+  int get lineCount => sourceCode.split('\n').length;
+
   @override
   State<CodeRenderer> createState() => _CodeRendererState();
 }
@@ -92,24 +94,63 @@ class _CodeRendererState extends State<CodeRenderer> {
     );
   }
 
+  static const _codeTextStyle = TextStyle(
+    fontFamily: 'JetBrains Mono',
+    fontFamilyFallback: [
+      'Menlo',
+      'Cascadia Code',
+      'Consolas',
+      'monospace',
+    ],
+    fontSize: 14,
+  );
+
   Widget _renderCode(BuildContext context, Highlighter highlighter) {
     return SingleChildScrollView(
       child: SizedBox(
         width: double.infinity,
-        child: Text.rich(
-          highlighter.highlight(widget.sourceCode),
-          style: TextStyle(
-            fontFamily: 'JetBrains Mono',
-            fontFamilyFallback: [
-              'Menlo',
-              'Cascadia Code',
-              'Consolas',
-              'monospace',
-            ],
-            fontSize: 14,
-          ),
+        child: Row(
+          children: [
+            _buildLineNumbers(context, highlighter),
+            Expanded(
+              child: Text.rich(
+                highlighter.highlight(widget.sourceCode),
+                style: _codeTextStyle,
+              ),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildLineNumbers(BuildContext context, Highlighter highlighter) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        for (var i = 0; i < widget.lineCount; i++)
+          Padding(
+            padding: const EdgeInsets.only(right: 12.0),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  right: BorderSide(
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: Text(
+                  '${i + 1}',
+                  style: _codeTextStyle.copyWith(
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
