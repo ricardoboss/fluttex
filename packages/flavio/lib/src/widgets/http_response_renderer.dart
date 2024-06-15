@@ -40,27 +40,22 @@ class HttpResponseRenderer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: SizedBox(
-        width: double.infinity,
-        child: switch (contentType?.type) {
-          'text' => switch (contentType?.subtype) {
-              'html' => _renderHtml(context),
-              'css' => _renderCode(context),
-              _ => _renderText(context),
-            },
-          'application' => switch (contentType?.subtype) {
-              'javascript' => _renderCode(context),
-              'lua' => _renderCode(context),
-              'json' => _renderCode(context),
-              _ => _renderUnsupportedContentType(context),
-            },
-          'image' => _renderImage(context),
-          null => _renderText(context),
+    return switch (contentType?.type) {
+      'text' => switch (contentType?.subtype) {
+          'html' => _renderHtml(context),
+          'css' => _renderCode(context),
+          _ => _renderText(context),
+        },
+      'application' => switch (contentType?.subtype) {
+          'javascript' => _renderCode(context),
+          'lua' => _renderCode(context),
+          'json' => _renderCode(context),
           _ => _renderUnsupportedContentType(context),
         },
-      ),
-    );
+      'image' => _renderImage(context),
+      null => _renderText(context),
+      _ => _renderUnsupportedContentType(context),
+    };
   }
 
   Widget _renderHtml(BuildContext context) {

@@ -30,26 +30,35 @@ class _ImageRendererState extends State<ImageRenderer> {
   }
 
   Widget _buildImageFavicon(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(4.0),
-      child: const Icon(Icons.image),
-    );
+    return _buildActualImage(context) ?? const Icon(Icons.image);
   }
 
   @override
   Widget build(BuildContext context) {
+    return Container(
+      color: Colors.black,
+      child: Center(
+        child:
+            _buildActualImage(context) ?? _buildUnsupportedContentType(context),
+      ),
+    );
+  }
+
+  Widget? _buildActualImage(BuildContext context) {
     return switch (widget.contentType?.type) {
       'image' => switch (widget.contentType?.subtype) {
-          'svg' => _buildSvg(context),
+          'svg+xml' => _buildSvg(context),
           _ => _buildBitmap(context),
         },
       null => _buildBitmap(context),
-      _ => _buildUnsupportedContentType(context),
+      _ => null,
     };
   }
 
   Widget _buildBitmap(BuildContext context) {
-    return Image.memory(widget.imageBytes);
+    return Image.memory(
+      widget.imageBytes,
+    );
   }
 
   Widget _buildSvg(BuildContext context) {
@@ -57,8 +66,6 @@ class _ImageRendererState extends State<ImageRenderer> {
   }
 
   Widget _buildUnsupportedContentType(BuildContext context) {
-    return Center(
-      child: Text('Unsupported content type: ${widget.contentType}'),
-    );
+    return Text('Unsupported content type: ${widget.contentType}');
   }
 }

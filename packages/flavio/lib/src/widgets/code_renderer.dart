@@ -75,19 +75,7 @@ class _CodeRendererState extends State<CodeRenderer> {
       future: _highlighterInitialized,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return Text.rich(
-            snapshot.requireData.highlight(widget.sourceCode),
-            style: TextStyle(
-              fontFamily: 'JetBrains Mono',
-              fontFamilyFallback: [
-                'Menlo',
-                'Cascadia Code',
-                'Consolas',
-                'monospace',
-              ],
-              fontSize: 14,
-            ),
-          );
+          return _renderCode(context, snapshot.requireData);
         }
 
         if (snapshot.hasError) {
@@ -101,6 +89,27 @@ class _CodeRendererState extends State<CodeRenderer> {
           ),
         );
       },
+    );
+  }
+
+  Widget _renderCode(BuildContext context, Highlighter highlighter) {
+    return SingleChildScrollView(
+      child: SizedBox(
+        width: double.infinity,
+        child: Text.rich(
+          highlighter.highlight(widget.sourceCode),
+          style: TextStyle(
+            fontFamily: 'JetBrains Mono',
+            fontFamilyFallback: [
+              'Menlo',
+              'Cascadia Code',
+              'Consolas',
+              'monospace',
+            ],
+            fontSize: 14,
+          ),
+        ),
+      ),
     );
   }
 }

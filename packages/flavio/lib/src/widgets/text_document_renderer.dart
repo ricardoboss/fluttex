@@ -33,16 +33,23 @@ class _TextDocumentRendererState extends State<TextDocumentRenderer> {
   }
 
   @override
-  Widget build(BuildContext context) => Text(
-        style: TextStyle(
-          fontFamily: 'JetBrains Mono',
-          fontFamilyFallback: [
-            'Menlo',
-            'Consolas',
-            'monospace',
-          ],
-          fontSize: 14,
-        ),
-        widget.text,
-      );
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: SizedBox(
+        width: double.infinity,
+        child: Text(
+            style: TextStyle(
+              fontFamily: 'JetBrains Mono',
+              fontFamilyFallback: [
+                'Menlo',
+                'Consolas',
+                'monospace',
+              ],
+              fontSize: 14,
+            ),
+            widget.text,
+          ),
+      ),
+    );
+  }
 }

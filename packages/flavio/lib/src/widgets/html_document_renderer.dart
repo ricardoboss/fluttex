@@ -114,26 +114,31 @@ class _HtmlDocumentRendererState extends State<HtmlDocumentRenderer> {
 
   @override
   Widget build(BuildContext context) {
-    return HtmlContextWidget(
-      context: HtmlContext(
-        document: widget.document,
-        response: widget.response,
-      ),
-      child: FutureBuilder<HtmlBodyElement>(
-        future: bodyFuture,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return HtmlBodyRenderer(element: snapshot.requireData);
-          }
+    return SingleChildScrollView(
+      child: SizedBox(
+        width: double.infinity,
+        child: HtmlContextWidget(
+          context: HtmlContext(
+            document: widget.document,
+            response: widget.response,
+          ),
+          child: FutureBuilder<HtmlBodyElement>(
+            future: bodyFuture,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return HtmlBodyRenderer(element: snapshot.requireData);
+              }
 
-          if (snapshot.hasError) {
-            return ErrorWidget(snapshot.error!);
-          }
+              if (snapshot.hasError) {
+                return ErrorWidget(snapshot.error!);
+              }
 
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        },
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            },
+          ),
+        ),
       ),
     );
   }
