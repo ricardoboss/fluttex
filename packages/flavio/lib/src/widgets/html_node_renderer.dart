@@ -47,6 +47,8 @@ class HtmlNodeRenderer extends StatelessWidget {
         return HtmlListRenderer(element: ul);
       case final HtmlOlElement ol:
         return HtmlListRenderer(element: ol);
+      case final HtmlTableElement table:
+        return HtmlTableRenderer(table: table);
       case final HtmlErrorNode errorNode:
         return Text(
           errorNode.message,

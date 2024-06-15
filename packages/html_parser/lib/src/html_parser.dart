@@ -237,6 +237,55 @@ class HtmlParser {
               );
 
               break;
+            case 'table':
+              yield HtmlTableElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'tbody':
+              yield HtmlTbodyElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'td':
+              yield HtmlTdElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'tfoot':
+              yield HtmlTfootElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'thead':
+              yield HtmlTheadElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'tr':
+              yield HtmlTrElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'th':
+              yield HtmlThElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
             default:
               yield HtmlElement(
                 tagName: tagName,

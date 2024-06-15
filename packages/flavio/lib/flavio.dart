@@ -34,6 +34,7 @@ part 'src/widgets/html_list_renderer.dart';
 part 'src/widgets/html_node_renderer.dart';
 part 'src/widgets/html_nodes_renderer.dart';
 part 'src/widgets/html_p_renderer.dart';
+part 'src/widgets/html_table_renderer.dart';
 part 'src/widgets/http_response_renderer.dart';
 part 'src/widgets/image_renderer.dart';
 part 'src/widgets/streamed_response_body.dart';
