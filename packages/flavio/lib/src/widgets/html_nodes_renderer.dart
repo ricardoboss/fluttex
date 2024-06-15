@@ -3,10 +3,12 @@ part of '../../flavio.dart';
 class HtmlNodesRenderer extends StatelessWidget {
   const HtmlNodesRenderer({
     required this.nodes,
+    this.direction = Axis.vertical,
     super.key,
   });
 
   final List<HtmlNode> nodes;
+  final Axis direction;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +21,7 @@ class HtmlNodesRenderer extends StatelessWidget {
     }
 
     return Flex(
-      direction: Axis.vertical, // TODO(ricardoboss): support horizontal
+      direction: direction,
       children: [
         for (final node in nodes)
           HtmlNodeRenderer(node: node),

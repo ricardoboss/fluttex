@@ -63,6 +63,13 @@ packages:
       relative: true
     source: path
     version: "0.0.0"
+  css_parser:
+    dependency: transitive
+    description:
+      path: "packages/css_parser"
+      relative: true
+    source: path
+    version: "0.0.0"
   event_bus:
     dependency: transitive
     description:

@@ -1,13 +1,13 @@
-import 'package:css_parser/css_map.dart';
-import 'package:css_parser/style_context.dart';
-import 'package:flutter/foundation.dart';
+part of '../flavio.dart';
 
 class StyleController with ChangeNotifier {
   StyleController();
 
-  StyleContext _context = const StyleContext(
+  static const StyleContext defaultContext = StyleContext(
     fontSize: 16,
   );
+
+  StyleContext _context = defaultContext;
 
   StyleContext get context => _context;
 
@@ -21,5 +21,9 @@ class StyleController with ChangeNotifier {
     final newContext = StyleContext(parent: _context, map: map);
 
     setContext(newContext);
+  }
+
+  void resetContext() {
+    setContext(defaultContext);
   }
 }

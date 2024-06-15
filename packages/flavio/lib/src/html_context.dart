@@ -4,6 +4,7 @@ class HtmlContext {
   HtmlContext({
     required this.document,
     required this.response,
+    required this.styleController,
   });
 
   static HtmlContext of(BuildContext context) {
@@ -12,4 +13,5 @@ class HtmlContext {
 
   final HtmlDocument document;
   final http.BaseResponse? response;
+  final StyleController styleController;
 }

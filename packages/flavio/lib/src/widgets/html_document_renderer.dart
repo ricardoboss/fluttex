@@ -17,6 +17,8 @@ class HtmlDocumentRenderer extends StatefulWidget {
 class _HtmlDocumentRendererState extends State<HtmlDocumentRenderer> {
   late final Future<HtmlBodyElement> bodyFuture;
 
+  final _styleController = StyleController();
+
   @override
   void initState() {
     super.initState();
@@ -64,12 +66,65 @@ class _HtmlDocumentRendererState extends State<HtmlDocumentRenderer> {
 
       assert(href != null, 'Style sheet link has no href');
 
-      debugPrint('Loading style sheet: $href');
+      Uri uri = Uri.parse(href!);
+      if (!uri.isAbsolute) {
+        uri = widget.response!.request!.url.resolveUri(uri);
+      }
+
+      await _loadStyleSheet(uri);
+    }
+  }
+
+  Future<void> _loadStyleSheet(Uri uri) async {
+    requestBus.fire(ResourceRequest(
+      uri: uri,
+      fulfill: _onStyleSheetLoaded,
+      reject: (e) {
+        /* TODO(ricardoboss): handle errors */
+      },
+      contentTypeHint: MediaType('text', 'css'),
+    ));
+  }
+
+  Future<void> _onStyleSheetLoaded(http.BaseResponse response) async {
+    final css = switch (response) {
+      final http.StreamedResponse streamedResponse =>
+        await streamedResponse.stream.bytesToString(),
+      _ => (response as http.Response).body,
+    };
+
+    try {
+      final map = const CssParser().parse(css);
+
+      _styleController.addMap(map);
+    } catch (e) {
+      debugPrint('Error parsing CSS: $e');
     }
   }
 
   Future<void> _processScripts() async {
-    // TODO(ricardoboss): implement
+    final scriptLinks = widget.document.head?.findAllTags(
+          'script',
+          (l) => l.attributes['src'] != null,
+        ) ??
+        <HtmlElement>[];
+
+    for (final link in scriptLinks) {
+      final src = link.attributes['src'];
+
+      assert(src != null, 'Script link has no src');
+
+      Uri uri = Uri.parse(src!);
+      if (!uri.isAbsolute) {
+        uri = widget.response!.request!.url.resolveUri(uri);
+      }
+
+      await _loadScript(uri);
+    }
+  }
+
+  Future<void> _loadScript(Uri uri) async {
+    debugPrint('Loading script: $uri');
   }
 
   String _getTitle(HtmlDocument document) {
@@ -84,11 +139,17 @@ class _HtmlDocumentRendererState extends State<HtmlDocumentRenderer> {
 
     for (final link in document.head?.findAllTags(
           'link',
-          (l) => [
-            'icon',
-            'shortcut icon',
-            'apple-touch-icon',
-          ].contains(l.attributes['rel']),
+          (l) =>
+              [
+                'icon',
+                'shortcut icon',
+                'apple-touch-icon',
+              ].contains(l.attributes['rel']) ||
+              [
+                'ico',
+                'png',
+                'jpg',
+              ].any((ext) => l.attributes['href']?.endsWith(ext) ?? false),
         ) ??
         <HtmlElement>[]) {
       final href = link.attributes['href'];
@@ -101,7 +162,12 @@ class _HtmlDocumentRendererState extends State<HtmlDocumentRenderer> {
         uri = widget.response!.request!.url.resolveUri(uri);
       }
 
-      final mime = MediaType.parse(link.attributes['type'] ?? '');
+      final maybeType = link.attributes['type'];
+      final mime = maybeType != null
+          ? MediaType.parse(maybeType)
+          : guessContentTypeByExtension(
+                  uri.pathSegments.last.split('.').last) ??
+              MediaType('image', 'png');
       if (mime.type != 'image') {
         continue;
       }
@@ -121,6 +187,7 @@ class _HtmlDocumentRendererState extends State<HtmlDocumentRenderer> {
           context: HtmlContext(
             document: widget.document,
             response: widget.response,
+            styleController: _styleController,
           ),
           child: FutureBuilder<HtmlBodyElement>(
             future: bodyFuture,
