@@ -74,6 +74,22 @@ class HtmlTokenizer {
               state = _TokenizerState.insideTag;
 
               break;
+            case _TokenizerState.attributeName:
+
+              if (buffer.isEmpty) {
+                throw Exception('Empty attribute name');
+              }
+
+              final attributeName = buffer.toString();
+              buffer.clear();
+
+              yield HtmlToken(HtmlTokenType.attributeName, attributeName);
+
+              yield HtmlToken(HtmlTokenType.whitespace, ' ');
+
+              state = _TokenizerState.insideTag;
+
+              break;
             case _TokenizerState.attributeValue:
               buffer.write(char);
 
@@ -200,6 +216,21 @@ class HtmlTokenizer {
               buffer.clear();
 
               yield HtmlToken(HtmlTokenType.tagName, tagName);
+
+              yield HtmlToken(HtmlTokenType.whitespace, char);
+
+              state = _TokenizerState.insideTag;
+
+              break;
+            case _TokenizerState.attributeName:
+              if (buffer.isEmpty) {
+                throw Exception('Empty attribute name');
+              }
+
+              final attributeName = buffer.toString();
+              buffer.clear();
+
+              yield HtmlToken(HtmlTokenType.attributeName, attributeName);
 
               yield HtmlToken(HtmlTokenType.whitespace, char);
 

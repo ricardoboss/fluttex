@@ -14,7 +14,19 @@ class HtmlNodeRenderer extends StatelessWidget {
       case final HtmlBodyElement body:
         return HtmlBodyRenderer(element: body);
       case final HtmlDivElement div:
-        return HtmlDivRenderer(element: div);
+        return HtmlDivLikeRenderer(element: div);
+      case final HtmlMainElement main:
+        return HtmlDivLikeRenderer(element: main);
+      case final HtmlNavElement nav:
+        return HtmlDivLikeRenderer(element: nav);
+      case final HtmlSectionElement section:
+        return HtmlDivLikeRenderer(element: section);
+      case final HtmlHeaderElement header:
+        return HtmlDivLikeRenderer(element: header);
+      case final HtmlFooterElement footer:
+        return HtmlDivLikeRenderer(element: footer);
+      case final HtmlArticleElement article:
+        return HtmlDivLikeRenderer(element: article);
       case final HtmlHrElement hr:
         return HtmlHrRenderer(element: hr);
       case final HtmlHElement h:
@@ -29,14 +41,12 @@ class HtmlNodeRenderer extends StatelessWidget {
         return HtmlButtonRenderer(element: button);
       case final HtmlAElement a:
         return HtmlARenderer(element: a);
-      case final HtmlHeaderElement header:
-        return HtmlHeaderRenderer(element: header);
-      case final HtmlArticleElement article:
-        return HtmlArticleRenderer(element: article);
-      case final HtmlFooterElement footer:
-        return HtmlFooterRenderer(element: footer);
       case final HtmlBrElement br:
         return HtmlBrRenderer(element: br);
+      case final HtmlUlElement ul:
+        return HtmlListRenderer(element: ul);
+      case final HtmlOlElement ol:
+        return HtmlListRenderer(element: ol);
       case final HtmlErrorNode errorNode:
         return Text(
           errorNode.message,

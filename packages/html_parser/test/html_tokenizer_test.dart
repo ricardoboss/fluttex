@@ -114,4 +114,68 @@ void main() {
       HtmlToken(HtmlTokenType.tagClose, '>'),
     ]);
   });
+
+  test('Tokenize standalone attribute', () {
+    const html = '<button disabled>Click</button>';
+
+    final tokens = HtmlTokenizer().tokenize(html).toList(growable: false);
+
+    expect(tokens, [
+      HtmlToken(HtmlTokenType.tagOpen, '<'),
+      HtmlToken(HtmlTokenType.tagName, 'button'),
+      HtmlToken(HtmlTokenType.whitespace, ' '),
+      HtmlToken(HtmlTokenType.attributeName, 'disabled'),
+      HtmlToken(HtmlTokenType.tagClose, '>'),
+      HtmlToken(HtmlTokenType.text, 'Click'),
+      HtmlToken(HtmlTokenType.tagEndingOpen, '</'),
+      HtmlToken(HtmlTokenType.tagName, 'button'),
+      HtmlToken(HtmlTokenType.tagClose, '>'),
+    ]);
+  });
+
+  test('Tokenize standalone attribute with other attributes', () {
+    const html = '<button disabled type="submit">Click</button>';
+
+    final tokens = HtmlTokenizer().tokenize(html).toList(growable: false);
+
+    expect(tokens, [
+      HtmlToken(HtmlTokenType.tagOpen, '<'),
+      HtmlToken(HtmlTokenType.tagName, 'button'),
+      HtmlToken(HtmlTokenType.whitespace, ' '),
+      HtmlToken(HtmlTokenType.attributeName, 'disabled'),
+      HtmlToken(HtmlTokenType.whitespace, ' '),
+      HtmlToken(HtmlTokenType.attributeName, 'type'),
+      HtmlToken(HtmlTokenType.attributeValue, 'submit'),
+      HtmlToken(HtmlTokenType.tagClose, '>'),
+      HtmlToken(HtmlTokenType.text, 'Click'),
+      HtmlToken(HtmlTokenType.tagEndingOpen, '</'),
+      HtmlToken(HtmlTokenType.tagName, 'button'),
+      HtmlToken(HtmlTokenType.tagClose, '>'),
+    ]);
+  });
+
+  test('Tokenize attributes on multiple lines', () {
+    const html = '<button\n  disabled\n  type="submit">Click</button>';
+
+    final tokens = HtmlTokenizer().tokenize(html).toList(growable: false);
+
+    expect(tokens, [
+      HtmlToken(HtmlTokenType.tagOpen, '<'),
+      HtmlToken(HtmlTokenType.tagName, 'button'),
+      HtmlToken(HtmlTokenType.whitespace, '\n'),
+      HtmlToken(HtmlTokenType.whitespace, ' '),
+      HtmlToken(HtmlTokenType.whitespace, ' '),
+      HtmlToken(HtmlTokenType.attributeName, 'disabled'),
+      HtmlToken(HtmlTokenType.whitespace, '\n'),
+      HtmlToken(HtmlTokenType.whitespace, ' '),
+      HtmlToken(HtmlTokenType.whitespace, ' '),
+      HtmlToken(HtmlTokenType.attributeName, 'type'),
+      HtmlToken(HtmlTokenType.attributeValue, 'submit'),
+      HtmlToken(HtmlTokenType.tagClose, '>'),
+      HtmlToken(HtmlTokenType.text, 'Click'),
+      HtmlToken(HtmlTokenType.tagEndingOpen, '</'),
+      HtmlToken(HtmlTokenType.tagName, 'button'),
+      HtmlToken(HtmlTokenType.tagClose, '>'),
+    ]);
+  });
 }

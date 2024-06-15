@@ -216,6 +216,27 @@ class HtmlParser {
               );
 
               break;
+            case 'nav':
+              yield HtmlNavElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'section':
+              yield HtmlSectionElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'main':
+              yield HtmlMainElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
             default:
               yield HtmlElement(
                 tagName: tagName,

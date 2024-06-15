@@ -18,7 +18,8 @@ class HtmlNodesRenderer extends StatelessWidget {
       return HtmlNodeRenderer(node: nodes.first);
     }
 
-    return Column(
+    return Flex(
+      direction: Axis.vertical, // TODO(ricardoboss): support horizontal
       children: [
         for (final node in nodes)
           HtmlNodeRenderer(node: node),
