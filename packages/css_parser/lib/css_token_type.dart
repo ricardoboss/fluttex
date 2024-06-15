@@ -11,4 +11,7 @@ enum CssTokenType {
   hexColor,
   semicolon,
   discreteValue,
+  functionName,
+  openParen,
+  closeParen,
 }

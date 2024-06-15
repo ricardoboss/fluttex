@@ -1,5 +1,7 @@
 import 'package:css_parser/css_map.dart';
 
+typedef StyleRuleSet = Map<String, CssValue>;
+
 class StyleContext {
   const StyleContext({
     StyleContext? parent,
@@ -21,7 +23,7 @@ class StyleContext {
 
   CssMap? get map => _map ?? _parent?.map;
 
-  Map<String, CssValue> select(List<String> selectors) {
+  StyleRuleSet select(List<String> selectors) {
     if (selectors.isEmpty) {
       return const {};
     }

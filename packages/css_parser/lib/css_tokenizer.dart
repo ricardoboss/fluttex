@@ -131,6 +131,8 @@ class CssTokenizer {
             case _TokenizerState.value:
             case _TokenizerState.insideDefinition:
             case _TokenizerState.beforeDefinition:
+              yield CssToken(CssTokenType.whitespace, ws);
+
               break;
             case _TokenizerState.selector:
               if (buffer.isNotEmpty) {
@@ -141,15 +143,19 @@ class CssTokenizer {
               }
 
               state = _TokenizerState.beforeDefinition;
+
+              yield CssToken(CssTokenType.whitespace, ws);
+
+              break;
+            case _TokenizerState.predefinedValue:
+              buffer.write(char);
+
+              break;
             default:
               throw UnimplementedError(
                 "Unexpected character 0x${ws.codeUnitAt(0).toRadixString(16).padLeft(2, '0')} in state $state",
               );
           }
-
-          yield CssToken(CssTokenType.whitespace, ws);
-
-          break;
         case ',':
           switch (state) {
             case _TokenizerState.beforeDefinition:
@@ -162,6 +168,17 @@ class CssTokenizer {
               buffer.clear();
 
               yield CssToken(CssTokenType.selector, selector);
+            case _TokenizerState.numberValue:
+              if (buffer.isEmpty) {
+                throw Exception('Empty number value');
+              }
+
+              final value = buffer.toString();
+              buffer.clear();
+
+              yield CssToken(CssTokenType.number, value);
+
+              state = _TokenizerState.value;
             default:
               throw UnimplementedError(
                 "Unexpected character ',' in state $state",
@@ -169,6 +186,52 @@ class CssTokenizer {
           }
 
           yield CssToken(CssTokenType.comma, ',');
+
+          break;
+        case '(':
+          switch (state) {
+            // until we find an opening parenthesis, the tokenizer thinks its a predefined value instead of a function
+            case _TokenizerState.predefinedValue:
+              if (buffer.isEmpty) {
+                throw Exception('Empty function name');
+              }
+
+              final function = buffer.toString();
+              buffer.clear();
+
+              yield CssToken(CssTokenType.functionName, function);
+
+              yield CssToken(CssTokenType.openParen, '(');
+
+              state = _TokenizerState.value;
+
+              break;
+            default:
+              throw UnimplementedError(
+                "Unexpected character '(' in state $state",
+              );
+          }
+        case ')':
+          switch (state) {
+            case _TokenizerState.numberValue:
+              if (buffer.isEmpty) {
+                throw Exception('Empty number value');
+              }
+
+              final value = buffer.toString();
+              buffer.clear();
+
+              yield CssToken(CssTokenType.number, value);
+              break;
+            default:
+              throw UnimplementedError(
+                "Unexpected character ')' in state $state",
+              );
+          }
+
+          yield CssToken(CssTokenType.closeParen, ')');
+
+          state = _TokenizerState.afterValue;
 
           break;
         default:
