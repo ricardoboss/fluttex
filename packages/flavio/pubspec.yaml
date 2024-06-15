@@ -19,6 +19,7 @@ dependencies:
     path: ../html_parser
   http_parser: ^4.0.2
   syntax_highlight: ^0.4.0
+  flutter_svg: ^2.0.10+1
 
 dev_dependencies:
   flutter_test:

@@ -27,8 +27,9 @@ class HttpResponsePageBuilder extends PageBuilder<HttpResponsePageInformation> {
       StreamedResponseBody(response: response);
 
   Widget _buildResponse(BuildContext context, http.Response response) {
-    final body = StringBuffer(response.body);
-
-    return HttpResponseRenderer(response: response, responseBody: body);
+    return HttpResponseRenderer(
+      response: response,
+      responseBody: response.bodyBytes,
+    );
   }
 }

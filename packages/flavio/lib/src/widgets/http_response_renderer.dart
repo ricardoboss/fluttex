@@ -8,7 +8,7 @@ class HttpResponseRenderer extends StatelessWidget {
   });
 
   final http.BaseResponse response;
-  final StringBuffer responseBody;
+  final Uint8List responseBody;
 
   Uri? get requestUri => response.request?.url;
 
@@ -26,12 +26,17 @@ class HttpResponseRenderer extends StatelessWidget {
         requestUri!.host == 'raw.githubusercontent.com' &&
         contentType == 'text/plain') {
       mediaType = guessContentTypeByExtension(
-        requestUri!.pathSegments.last.split('.').last,
+        filename.split('.').last,
       );
     }
 
     return mediaType;
   }
+
+  // TODO(ricardoboss): use encoding from headers
+  String get body => utf8.decode(responseBody);
+
+  String get filename => requestUri!.pathSegments.last;
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +55,7 @@ class HttpResponseRenderer extends StatelessWidget {
               'json' => _renderCode(context),
               _ => _renderUnsupportedContentType(context),
             },
+          'image' => _renderImage(context),
           null => _renderText(context),
           _ => _renderUnsupportedContentType(context),
         },
@@ -58,13 +64,13 @@ class HttpResponseRenderer extends StatelessWidget {
   }
 
   Widget _renderHtml(BuildContext context) {
-    final document = HtmlParser().parse(responseBody.toString());
+    final document = HtmlParser().parse(body);
 
     return HtmlDocumentRenderer(document: document, response: response);
   }
 
   Widget _renderText(BuildContext context) {
-    return TextDocumentRenderer(text: responseBody.toString());
+    return TextDocumentRenderer(text: body);
   }
 
   Widget _renderUnsupportedContentType(BuildContext context) {
@@ -73,8 +79,16 @@ class HttpResponseRenderer extends StatelessWidget {
 
   Widget _renderCode(BuildContext context) {
     return CodeRenderer(
-      filename: requestUri!.pathSegments.last,
-      sourceCode: responseBody.toString(),
+      filename: filename,
+      sourceCode: body,
+    );
+  }
+
+  Widget _renderImage(BuildContext context) {
+    return ImageRenderer(
+      filename: filename,
+      imageBytes: responseBody,
+      contentType: contentType,
     );
   }
 }

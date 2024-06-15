@@ -2,10 +2,12 @@ library flavio;
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:html_parser/html_parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
@@ -36,6 +38,7 @@ part 'src/widgets/html_node_renderer.dart';
 part 'src/widgets/html_nodes_renderer.dart';
 part 'src/widgets/html_p_renderer.dart';
 part 'src/widgets/http_response_renderer.dart';
+part 'src/widgets/image_renderer.dart';
 part 'src/widgets/streamed_response_body.dart';
 part 'src/widgets/text_document_renderer.dart';
 part 'src/widgets/unsupported_content_type_renderer.dart';

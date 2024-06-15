@@ -13,21 +13,24 @@ class StreamedResponseBody extends StatefulWidget {
 }
 
 class _StreamedResponseBodyState extends State<StreamedResponseBody> {
-  late final Future<StringBuffer> bodyFuture;
+  late final Future<Uint8List> bodyFuture;
 
   @override
   void initState() {
     super.initState();
 
-    bodyFuture = widget.response.stream.transform(utf8.decoder).fold(
-          StringBuffer(),
-          (StringBuffer buffer, String chunk) => buffer..write(chunk),
-        );
+    bodyFuture = _streamBody();
+  }
+
+  Future<Uint8List> _streamBody() async {
+    final response = widget.response;
+
+    return await response.stream.toBytes();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<StringBuffer>(
+    return FutureBuilder<Uint8List>(
       future: bodyFuture,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
@@ -49,7 +52,7 @@ class _StreamedResponseBodyState extends State<StreamedResponseBody> {
         child: CircularProgressIndicator(),
       );
 
-  Widget _buildBody(StringBuffer body) => HttpResponseRenderer(
+  Widget _buildBody(Uint8List body) => HttpResponseRenderer(
         response: widget.response,
         responseBody: body,
       );
