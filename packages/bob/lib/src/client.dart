@@ -80,10 +80,16 @@ class Client {
 
     // When the target is an IP address, the path is the same as target
     if (url != null && url.path != target) {
+      if (uri.path.isEmpty) {
+        uri = uri.replace(path: 'index.html');
+      }
+
       if (url.host == 'github.com') {
         final githubUser = url.pathSegments[0];
         final githubRepo = url.pathSegments[1];
-        final originalPath = uri.path.isEmpty ? 'index.html' : uri.path;
+
+        assert(uri.path.startsWith('/'));
+        final originalPath = uri.path.substring(1);
 
         final rawContentUrl =
             'https://raw.githubusercontent.com/$githubUser/$githubRepo/main/$originalPath';
@@ -94,9 +100,7 @@ class Client {
 
         return (Uri.parse(rawContentUrl), contentTypeGuess);
       } else {
-        final path = uri.path.isEmpty ? 'index.html' : uri.path;
-
-        return (url.replace(path: path), null);
+        return (url, null);
       }
     }
 

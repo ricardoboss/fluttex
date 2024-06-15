@@ -45,6 +45,10 @@ class QueryResolver {
       uri = uri.replace(scheme: 'buss');
     }
 
+    if (uri.path == '/') {
+      uri = uri.replace(path: '');
+    }
+
     return uri;
   }
 
