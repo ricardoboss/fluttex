@@ -4,4 +4,7 @@ class DispatchBuilderEvent extends Event {
   final PageInformation information;
 
   DispatchBuilderEvent(this.information);
+
+  @override
+  String get debug => '$DispatchBuilderEvent -> ${information.debug}';
 }

@@ -10,9 +10,12 @@ class HtmlInputRenderer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      decoration: InputDecoration(
-        labelText: element.attributes['placeholder'],
+    return SizedBox(
+      height: 40,
+      child: TextField(
+        decoration: InputDecoration(
+          labelText: element.attributes['placeholder'],
+        ),
       ),
     );
   }

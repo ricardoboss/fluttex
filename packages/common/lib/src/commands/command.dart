@@ -1,5 +1,5 @@
 part of '../../common.dart';
 
-abstract class Command {
+abstract class Command extends Firable {
   const Command();
 }

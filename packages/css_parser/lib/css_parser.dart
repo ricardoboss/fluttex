@@ -7,9 +7,9 @@ import 'package:css_parser/css_token_type.dart';
 import 'package:css_parser/css_tokenizer.dart';
 
 class CssParser {
-  const CssParser();
+  const CssParser._();
 
-  CssMap parse(String css) {
+  static CssMap parse(String css) {
     final tokens = CssTokenizer().tokenize(css);
 
     final entries = parseRules(tokens).toList(growable: false);
@@ -17,13 +17,13 @@ class CssParser {
     return CssMap(entries: entries);
   }
 
-  Iterable<CssMapEntry> parseRules(Iterable<CssToken> tokens) sync* {
+  static Iterable<CssMapEntry> parseRules(Iterable<CssToken> tokens) sync* {
     final queue = Queue<CssToken>()..addAll(tokens);
 
     yield* _parseRules(queue);
   }
 
-  Iterable<CssMapEntry> _parseRules(Queue<CssToken> queue) sync* {
+  static Iterable<CssMapEntry> _parseRules(Queue<CssToken> queue) sync* {
     while (queue.isNotEmpty) {
       final token = queue.removeFirst();
 
@@ -90,6 +90,33 @@ class CssParser {
 
                 properties[name] = CssDiscreteValue(value: value);
 
+                break;
+              case CssTokenType.functionName:
+                final functionName =
+                    queue.removeToken(CssTokenType.functionName).text;
+                queue.removeToken(CssTokenType.openParen);
+                switch (functionName) {
+                  case 'calc':
+                    final expression = queue.removeFirst().text;
+                    properties[name] = CssCalculation(expression: expression);
+                    break;
+                  case 'rgb':
+                    final r = queue.removeToken(CssTokenType.number).text;
+                    queue.removeToken(CssTokenType.comma);
+                    final g = queue.removeToken(CssTokenType.number).text;
+                    queue.removeToken(CssTokenType.comma);
+                    final b = queue.removeToken(CssTokenType.number).text;
+                    properties[name] = CssColor.rgb(
+                      r: int.parse(r),
+                      g: int.parse(g),
+                      b: int.parse(b),
+                    );
+                    break;
+                  default:
+                    throw UnimplementedError(
+                        "Unexpected function $functionName");
+                }
+                queue.removeToken(CssTokenType.closeParen);
                 break;
               default:
                 throw UnimplementedError(

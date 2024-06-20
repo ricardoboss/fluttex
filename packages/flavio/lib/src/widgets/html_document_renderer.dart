@@ -98,7 +98,7 @@ class _HtmlDocumentRendererState extends State<HtmlDocumentRenderer> {
       uri: uri,
       fulfill: _onStyleSheetLoaded,
       reject: (e) {
-        /* TODO(ricardoboss): handle errors */
+        // TODO(ricardoboss): handle errors
       },
       contentTypeHint: MediaType('text', 'css'),
     ));
@@ -112,7 +112,7 @@ class _HtmlDocumentRendererState extends State<HtmlDocumentRenderer> {
     };
 
     try {
-      final map = const CssParser().parse(css);
+      final map = CssParser.parse(css);
 
       _styleController.addMap(map);
     } catch (e) {
@@ -142,7 +142,18 @@ class _HtmlDocumentRendererState extends State<HtmlDocumentRenderer> {
   }
 
   Future<void> _loadScript(Uri uri) async {
-    debugPrint('Loading script: $uri');
+    requestBus.fire(ResourceRequest(
+      uri: uri,
+      fulfill: _onScriptLoaded,
+      reject: (e) {
+        // TODO(ricardoboss): handle errors
+      },
+      contentTypeHint: MediaType('application', 'lua'),
+    ));
+  }
+
+  Future<void> _onScriptLoaded(http.BaseResponse response) async {
+    // TODO(ricardoboss): run script
   }
 
   String _getTitle(HtmlDocument document) {
@@ -198,32 +209,42 @@ class _HtmlDocumentRendererState extends State<HtmlDocumentRenderer> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: SizedBox(
-        width: double.infinity,
-        child: HtmlContextWidget(
-          context: HtmlContext(
-            document: widget.document,
-            response: widget.response,
-            styleController: _styleController,
-          ),
-          child: FutureBuilder<HtmlBodyElement>(
-            future: bodyFuture,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return HtmlBodyRenderer(element: snapshot.requireData);
-              }
-
-              if (snapshot.hasError) {
-                return ErrorWidget(snapshot.error!);
-              }
-
-              return const Center(
-                child: CircularProgressIndicator(),
+    return HtmlContextWidget(
+      context: HtmlContext(
+        document: widget.document,
+        response: widget.response,
+        styleController: _styleController,
+      ),
+      child: FutureBuilder<HtmlBodyElement>(
+        future: bodyFuture,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return LayoutBuilder(builder: (context, constraints) {
+              return SingleChildScrollView(
+                physics: const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minWidth: constraints.maxWidth,
+                    maxWidth: constraints.maxWidth,
+                    minHeight: constraints.maxHeight,
+                    maxHeight: double.infinity,
+                  ),
+                  child: HtmlBodyRenderer(element: snapshot.requireData),
+                ),
               );
-            },
-          ),
-        ),
+            });
+          }
+
+          if (snapshot.hasError) {
+            return ErrorWidget(snapshot.error!);
+          }
+
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
       ),
     );
   }

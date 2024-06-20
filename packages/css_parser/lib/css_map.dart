@@ -77,6 +77,27 @@ class CssUnitlessNumber extends CssValue {
   int get hashCode => value.hashCode;
 }
 
+class CssCalculation extends CssValue {
+  CssCalculation({
+    required this.expression,
+  });
+
+  final String expression;
+
+  @override
+  String get text => 'calc($expression)';
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CssCalculation &&
+          runtimeType == other.runtimeType &&
+          expression == other.expression;
+
+  @override
+  int get hashCode => expression.hashCode;
+}
+
 class CssNumber extends CssValue {
   CssNumber({
     required this.value,
@@ -162,8 +183,23 @@ class CssColor extends CssValue {
     final actualValue = hex.startsWith('#') ? hex.substring(1) : hex;
 
     return CssColor(
-      color: int.parse(actualValue, radix: 16),
+      color: 255 << 24 | int.parse(actualValue, radix: 16),
       format: CssColorFormat.hex,
+    );
+  }
+
+  factory CssColor.rgb({
+    required int r,
+    required int g,
+    required int b,
+  }) {
+    assert(r >= 0 && r <= 255);
+    assert(g >= 0 && g <= 255);
+    assert(b >= 0 && b <= 255);
+
+    return CssColor(
+      color: 255 << 24 | r << 16 | g << 8 | b,
+      format: CssColorFormat.rgb,
     );
   }
 
@@ -173,6 +209,8 @@ class CssColor extends CssValue {
   @override
   String get text => switch (format) {
         CssColorFormat.hex => '#${color.toRadixString(16).padLeft(6, '0')}',
+        CssColorFormat.rgb =>
+          'rgb(${(color & 0xFF)}, ${(color >> 8) & 0xFF}, ${(color >> 16) & 0xFF})',
       };
 
   @override
@@ -189,6 +227,7 @@ class CssColor extends CssValue {
 
 enum CssColorFormat {
   hex,
+  rgb,
 }
 
 class CssDiscreteValue extends CssValue {

@@ -4,8 +4,7 @@ class CommandHandler {
   static final List<String> _queryHistory = [];
   static int _historyOffset = 0;
 
-  static String get lastQuery =>
-      _queryHistory.elementAt(_historyOffset);
+  static String get lastQuery => _queryHistory.elementAt(_historyOffset);
 
   static void register() {
     commandBus.on<ReloadCommand>().listen(_onReload);
@@ -141,6 +140,9 @@ class ErrorPageInformation extends PageInformation {
   final Uri? uri;
   final String code;
   final Object? error;
+
+  @override
+  String get debug => '$ErrorPageInformation -> $code';
 }
 
 class PlaceholderPageInformation extends PageInformation {
@@ -149,6 +151,9 @@ class PlaceholderPageInformation extends PageInformation {
   });
 
   final Uri uri;
+
+  @override
+  String get debug => '$PlaceholderPageInformation -> $uri';
 }
 
 class HttpResponsePageInformation extends PageInformation {
@@ -159,4 +164,8 @@ class HttpResponsePageInformation extends PageInformation {
 
   final http.BaseResponse response;
   final Uri uri;
+
+  @override
+  String get debug =>
+      '$HttpResponsePageInformation for $uri -> ${response.statusCode}';
 }

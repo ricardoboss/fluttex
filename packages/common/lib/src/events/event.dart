@@ -1,5 +1,5 @@
 part of '../../common.dart';
 
-abstract class Event {
+abstract class Event extends Firable {
   const Event();
 }

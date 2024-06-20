@@ -1,15 +1,9 @@
 part of '../../flavio.dart';
 
-class HtmlNodeRenderer extends StatelessWidget {
-  const HtmlNodeRenderer({
-    required this.node,
-    super.key,
-  });
+class HtmlNodeRenderer {
+  const HtmlNodeRenderer._();
 
-  final HtmlNode node;
-
-  @override
-  Widget build(BuildContext context) {
+  static Widget render(HtmlNode node) {
     switch (node) {
       case final HtmlBodyElement body:
         return HtmlBodyRenderer(element: body);
@@ -70,7 +64,10 @@ class HtmlNodeRenderer extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
-        return Text(textNode.text);
+        return Text(
+          textNode.text,
+          textAlign: TextAlign.left,
+        );
       case final HtmlCommentNode _:
         return const SizedBox.shrink();
       default:

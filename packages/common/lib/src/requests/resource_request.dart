@@ -16,4 +16,8 @@ class ResourceRequest extends Request<http.BaseResponse> {
 
   @override
   final FutureOr<void> Function(Object? error) reject;
+
+  @override
+  String get debug =>
+      '$ResourceRequest -> $uri (${contentTypeHint?.toString() ?? '???'})';
 }

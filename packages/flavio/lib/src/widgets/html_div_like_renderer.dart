@@ -25,13 +25,14 @@ class HtmlDivLikeRenderer extends StatelessWidget with StyleResolver {
     final style = resolveStyle(context, element);
 
     final direction = _getDirection(style);
+    final alignment = _getAlignment(style);
+    final gap = _getGap(style);
 
-    return Align(
-      alignment: Alignment.topLeft,
-      child: HtmlNodesRenderer(
-        direction: direction.axis,
-        nodes: element.children,
-      ),
+    return HtmlNodesRenderer(
+      nodes: element.children,
+      direction: direction.axis,
+      alignment: alignment,
+      gap: gap,
     );
   }
 
@@ -42,6 +43,34 @@ class HtmlDivLikeRenderer extends StatelessWidget with StyleResolver {
       'row' => _DivDirection.row,
       _ => _DivDirection.column,
     };
+  }
+
+  static CrossAxisAlignment _getAlignment(StyleRuleSet rules) {
+    final alignment = rules['align-items']?.text;
+
+    return switch (alignment) {
+      'start' => CrossAxisAlignment.start,
+      'end' => CrossAxisAlignment.end,
+      'center' => CrossAxisAlignment.center,
+      'stretch' => CrossAxisAlignment.stretch,
+      _ => CrossAxisAlignment.stretch,
+    };
+  }
+
+  static double _getGap(StyleRuleSet rules) {
+    final gap = rules['gap'];
+    if (gap == null) {
+      return 0.0;
+    }
+
+    switch (gap) {
+      case final CssUnitlessNumber unitlessNumber:
+        return unitlessNumber.value.toDouble();
+      case final CssNumber number:
+        return number.value.toDouble();
+      default:
+        throw UnimplementedError('Unexpected gap type ${gap.runtimeType}');
+    }
   }
 }
 

@@ -19,15 +19,17 @@ class HtmlListRenderer extends StatelessWidget {
     );
   }
 
-  Widget _renderChildNode(BuildContext context, HtmlNode node, int index, int level) {
+  Widget _renderChildNode(
+      BuildContext context, HtmlNode node, int index, int level) {
     if (node case final HtmlLiElement li) {
       return _renderListItem(context, li, index, level);
     }
 
-    return HtmlNodeRenderer(node: node);
+    return HtmlNodeRenderer.render(node);
   }
 
-  Widget _renderListItem(BuildContext context, HtmlLiElement li, int index, int level) {
+  Widget _renderListItem(
+      BuildContext context, HtmlLiElement li, int index, int level) {
     return Row(
       children: [
         _bullet(context, index, level),

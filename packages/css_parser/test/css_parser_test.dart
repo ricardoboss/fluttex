@@ -6,7 +6,7 @@ void main() {
   test('Parse simple CSS', () {
     const css = 'h1 { color: red; }';
 
-    final map = const CssParser().parse(css);
+    final map = CssParser.parse(css);
 
     expect(map.entries.length, 1);
     expect(map.entries.first.selectors, ['h1']);
@@ -26,7 +26,7 @@ body {
 }
 ''';
 
-    final map = const CssParser().parse(css);
+    final map = CssParser.parse(css);
 
     expect(map.entries.length, 1);
     expect(map.entries.first.selectors, ['body']);
@@ -37,5 +37,27 @@ body {
     expect(map.entries.first.properties['padding'], CssNumber.px(10));
     expect(map.entries.first.properties['border-radius'], CssNumber.em(1));
     expect(map.entries.first.properties['gap'], CssUnitlessNumber(value: 50));
+  });
+
+  test('Parse CSS with functions', () {
+    const css = '''
+body {
+    background-color: rgb(24, 24, 24);
+    padding: calc(10px);
+}
+''';
+
+    final map = CssParser.parse(css);
+
+    expect(map.entries.length, 1);
+    expect(map.entries.first.selectors, ['body']);
+    expect(
+      map.entries.first.properties['background-color'],
+      CssColor.rgb(r: 24, g: 24, b: 24),
+    );
+    expect(
+      map.entries.first.properties['padding'],
+      CssCalculation(expression: '10px'),
+    );
   });
 }
