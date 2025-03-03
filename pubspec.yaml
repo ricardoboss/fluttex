@@ -31,3 +31,12 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+workspace:
+  - packages/bob
+  - packages/common
+  - packages/css_parser
+  - packages/flavio
+  - packages/html_parser
+  - packages/sandy
+  - packages/smith
