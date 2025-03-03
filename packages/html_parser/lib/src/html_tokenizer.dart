@@ -98,8 +98,6 @@ class HtmlTokenizer {
               buffer.write(char);
 
               break;
-            default:
-              throw UnimplementedError("Unexpected space in state $state");
           }
         case '>':
           switch (state) {
