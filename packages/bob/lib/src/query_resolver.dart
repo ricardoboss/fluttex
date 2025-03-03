@@ -24,7 +24,6 @@ class QueryResolver {
     'http',
     'https',
     'file',
-    'buss',
   };
 
   static Future<Uri> resolve(String query) async {
@@ -42,7 +41,7 @@ class QueryResolver {
     }
 
     if (uri.scheme.isEmpty) {
-      uri = uri.replace(scheme: 'buss');
+      uri = uri.replace(scheme: 'https');
     }
 
     if (uri.path == '/') {
@@ -57,6 +56,6 @@ class QueryResolver {
   }
 
   static Uri _openInSearch(String query) {
-    return Uri.parse('buss://dingle.it/?q=$query');
+    return Uri.parse('https://google.com/search?q=$query');
   }
 }
