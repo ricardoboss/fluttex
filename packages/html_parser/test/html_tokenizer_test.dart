@@ -178,4 +178,64 @@ void main() {
       HtmlToken(HtmlTokenType.tagClose, '>'),
     ]);
   });
+
+  test('Tokenize attributes without quotes', () {
+    const html = '<a class=gb1 href="https://www.google.com/imghp?hl=de&tab=wi">Bilder</a>';
+
+    final tokens = HtmlTokenizer().tokenize(html).toList(growable: false);
+
+    expect(tokens, [
+      HtmlToken(HtmlTokenType.tagOpen, '<'),
+      HtmlToken(HtmlTokenType.tagName, 'a'),
+      HtmlToken(HtmlTokenType.whitespace, ' '),
+      HtmlToken(HtmlTokenType.attributeName, 'class'),
+      HtmlToken(HtmlTokenType.attributeValue, 'gb1'),
+      HtmlToken(HtmlTokenType.whitespace, ' '),
+      HtmlToken(HtmlTokenType.attributeName, 'href'),
+      HtmlToken(HtmlTokenType.attributeValue, 'https://www.google.com/imghp?hl=de&tab=wi'),
+      HtmlToken(HtmlTokenType.tagClose, '>'),
+      HtmlToken(HtmlTokenType.text, 'Bilder'),
+      HtmlToken(HtmlTokenType.tagEndingOpen, '</'),
+      HtmlToken(HtmlTokenType.tagName, 'a'),
+      HtmlToken(HtmlTokenType.tagClose, '>'),
+    ]);
+  });
+
+  test('Tokenize with script islands', () {
+    const html = '<script type="text/javascript">alert("Hello");</script>';
+
+    final tokens = HtmlTokenizer().tokenize(html).toList(growable: false);
+
+    expect(tokens, [
+      HtmlToken(HtmlTokenType.tagOpen, '<'),
+      HtmlToken(HtmlTokenType.tagName, 'script'),
+      HtmlToken(HtmlTokenType.whitespace, ' '),
+      HtmlToken(HtmlTokenType.attributeName, 'type'),
+      HtmlToken(HtmlTokenType.attributeValue, 'text/javascript'),
+      HtmlToken(HtmlTokenType.tagClose, '>'),
+      HtmlToken(HtmlTokenType.script, 'alert("Hello");'),
+      HtmlToken(HtmlTokenType.tagEndingOpen, '</'),
+      HtmlToken(HtmlTokenType.tagName, 'script'),
+      HtmlToken(HtmlTokenType.tagClose, '>'),
+    ]);
+  });
+
+  test('Tokenize with script and escaped HTML', () {
+    const html = '<script type="text/javascript">alert("</script>");</script>';
+
+    final tokens = HtmlTokenizer().tokenize(html).toList(growable: false);
+
+    expect(tokens, [
+      HtmlToken(HtmlTokenType.tagOpen, '<'),
+      HtmlToken(HtmlTokenType.tagName, 'script'),
+      HtmlToken(HtmlTokenType.whitespace, ' '),
+      HtmlToken(HtmlTokenType.attributeName, 'type'),
+      HtmlToken(HtmlTokenType.attributeValue, 'text/javascript'),
+      HtmlToken(HtmlTokenType.tagClose, '>'),
+      HtmlToken(HtmlTokenType.script, 'alert("</script>");'),
+      HtmlToken(HtmlTokenType.tagEndingOpen, '</'),
+      HtmlToken(HtmlTokenType.tagName, 'script'),
+      HtmlToken(HtmlTokenType.tagClose, '>'),
+    ]);
+  });
 }

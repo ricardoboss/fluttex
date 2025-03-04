@@ -11,18 +11,73 @@ class HtmlTokenizer {
     var state = _TokenizerState.initial;
     final buffer = StringBuffer();
     final queue = Queue<String>()..addAll(html.split(''));
+    var tagName = '';
+    var islandStringChar = '';
+    var escapeNext = false;
     while (queue.isNotEmpty) {
+      if (state == _TokenizerState.island) {
+        if (queue.isEmpty) {
+          throw Exception('Unexpected EOF in island');
+        }
+
+        if (islandStringChar.isEmpty) {
+          if (queue.startsWith('</$tagName>')) {
+            queue.removeFirstEntries('</$tagName>'.length);
+
+            final script = buffer.toString();
+            buffer.clear();
+
+            yield HtmlToken(HtmlTokenType.script, script);
+
+            yield HtmlToken(HtmlTokenType.tagEndingOpen, '</');
+            yield HtmlToken(HtmlTokenType.tagName, tagName);
+            yield HtmlToken(HtmlTokenType.tagClose, '>');
+
+            state = _TokenizerState.initial;
+
+            continue;
+          }
+        }
+
+        final char = queue.removeFirst();
+        if (!escapeNext) {
+          if (char == '\\') {
+            escapeNext = true;
+
+            continue;
+          }
+
+          if (char == islandStringChar) {
+            islandStringChar = '';
+          } else if (char == '"' || char == "'") {
+            islandStringChar = char;
+          }
+        } else {
+          escapeNext = false;
+        }
+
+        buffer.write(char);
+
+        continue;
+      }
+
       final char = queue.removeFirst();
 
       switch (char) {
         case '<':
           switch (state) {
+            case _TokenizerState.island:
             case _TokenizerState.initial:
               if (buffer.isNotEmpty) {
                 final text = buffer.toString();
                 buffer.clear();
 
-                yield HtmlToken(HtmlTokenType.text, text);
+                yield HtmlToken(
+                  state == _TokenizerState.island
+                      ? HtmlTokenType.script
+                      : HtmlTokenType.text,
+                  text,
+                );
               }
 
               state = _TokenizerState.tagName;
@@ -52,7 +107,21 @@ class HtmlTokenizer {
         case ' ':
           switch (state) {
             case _TokenizerState.initial:
+            case _TokenizerState.quotedAttributeValue:
+            case _TokenizerState.comment:
+            case _TokenizerState.island:
               buffer.write(char);
+
+              break;
+            case _TokenizerState.attributeValue:
+              final attributeValue = buffer.toString();
+              buffer.clear();
+
+              yield HtmlToken(HtmlTokenType.attributeValue, attributeValue);
+
+              yield HtmlToken(HtmlTokenType.whitespace, ' ');
+
+              state = _TokenizerState.insideTag;
 
               break;
             case _TokenizerState.insideTag:
@@ -60,7 +129,7 @@ class HtmlTokenizer {
 
               break;
             case _TokenizerState.tagName:
-              final tagName = buffer.toString();
+              tagName = buffer.toString();
               buffer.clear();
 
               if (tagName.isEmpty) {
@@ -75,7 +144,6 @@ class HtmlTokenizer {
 
               break;
             case _TokenizerState.attributeName:
-
               if (buffer.isEmpty) {
                 throw Exception('Empty attribute name');
               }
@@ -90,14 +158,6 @@ class HtmlTokenizer {
               state = _TokenizerState.insideTag;
 
               break;
-            case _TokenizerState.attributeValue:
-              buffer.write(char);
-
-              break;
-            case _TokenizerState.comment:
-              buffer.write(char);
-
-              break;
           }
         case '>':
           switch (state) {
@@ -110,8 +170,12 @@ class HtmlTokenizer {
                 throw Exception('Empty tag name');
               }
 
-              final tagName = buffer.toString();
+              tagName = buffer.toString();
               buffer.clear();
+
+              if (tagName.isEmpty) {
+                throw Exception('Empty tag name');
+              }
 
               yield HtmlToken(HtmlTokenType.tagName, tagName);
 
@@ -122,6 +186,12 @@ class HtmlTokenizer {
               break;
             case _TokenizerState.insideTag:
               yield HtmlToken(HtmlTokenType.tagClose, '>');
+
+              if (['script', 'style'].contains(tagName)) {
+                state = _TokenizerState.island;
+
+                break;
+              }
 
               state = _TokenizerState.initial;
 
@@ -135,6 +205,17 @@ class HtmlTokenizer {
               buffer.clear();
 
               yield HtmlToken(HtmlTokenType.attributeName, attributeName);
+
+              yield HtmlToken(HtmlTokenType.tagClose, '>');
+
+              state = _TokenizerState.initial;
+
+              break;
+            case _TokenizerState.attributeValue:
+              final attributeValue = buffer.toString();
+              buffer.clear();
+
+              yield HtmlToken(HtmlTokenType.attributeValue, attributeValue);
 
               yield HtmlToken(HtmlTokenType.tagClose, '>');
 
@@ -151,6 +232,9 @@ class HtmlTokenizer {
         case '/':
           switch (state) {
             case _TokenizerState.initial:
+            case _TokenizerState.quotedAttributeValue:
+            case _TokenizerState.comment:
+            case _TokenizerState.island:
               buffer.write(char);
 
               break;
@@ -159,8 +243,12 @@ class HtmlTokenizer {
                 throw Exception('Empty tag name');
               }
 
-              final tagName = buffer.toString();
+              tagName = buffer.toString();
               buffer.clear();
+
+              if (tagName.isEmpty) {
+                throw Exception('Empty tag name');
+              }
 
               yield HtmlToken(HtmlTokenType.tagName, tagName);
 
@@ -187,14 +275,6 @@ class HtmlTokenizer {
               state = _TokenizerState.initial;
 
               break;
-            case _TokenizerState.attributeValue:
-              buffer.write(char);
-
-              break;
-            case _TokenizerState.comment:
-              buffer.write(char);
-
-              break;
             default:
               throw UnimplementedError("Unexpected '/' in state $state");
           }
@@ -202,6 +282,8 @@ class HtmlTokenizer {
         case '\n':
           switch (state) {
             case _TokenizerState.initial:
+            case _TokenizerState.comment:
+            case _TokenizerState.island:
               buffer.write(char);
 
               break;
@@ -210,8 +292,12 @@ class HtmlTokenizer {
                 throw Exception('Empty tag name');
               }
 
-              final tagName = buffer.toString();
+              tagName = buffer.toString();
               buffer.clear();
+
+              if (tagName.isEmpty) {
+                throw Exception('Empty tag name');
+              }
 
               yield HtmlToken(HtmlTokenType.tagName, tagName);
 
@@ -239,16 +325,13 @@ class HtmlTokenizer {
               yield HtmlToken(HtmlTokenType.whitespace, char);
 
               break;
-            case _TokenizerState.comment:
-              buffer.write(char);
-
-              break;
             default:
               throw UnimplementedError("Unexpected line break in state $state");
           }
         default:
           switch (state) {
             case _TokenizerState.tagName:
+            case _TokenizerState.attributeValue:
               buffer.write(char);
 
               break;
@@ -259,19 +342,25 @@ class HtmlTokenizer {
 
                 yield HtmlToken(HtmlTokenType.attributeName, attributeName);
 
-                if (queue.isEmpty || queue.first != '"') {
-                  throw Exception('Expected " after attribute name and =');
+                if (queue.isEmpty) {
+                  throw Exception(
+                    'Expected attribute value after attribute name and =, got EOF',
+                  );
                 }
 
-                queue.removeFirst();
+                if (queue.first == '"') {
+                  queue.removeFirst();
 
-                state = _TokenizerState.attributeValue;
+                  state = _TokenizerState.quotedAttributeValue;
+                } else {
+                  state = _TokenizerState.attributeValue;
+                }
               } else {
                 buffer.write(char);
               }
 
               break;
-            case _TokenizerState.attributeValue:
+            case _TokenizerState.quotedAttributeValue:
               if (char == '"') {
                 final attributeValue = buffer.toString();
                 buffer.clear();
@@ -279,9 +368,11 @@ class HtmlTokenizer {
                 yield HtmlToken(HtmlTokenType.attributeValue, attributeValue);
 
                 state = _TokenizerState.insideTag;
-              } else {
-                buffer.write(char);
+
+                break;
               }
+
+              buffer.write(char);
 
               break;
             case _TokenizerState.insideTag:
@@ -328,5 +419,7 @@ enum _TokenizerState {
   insideTag,
   attributeName,
   attributeValue,
+  quotedAttributeValue,
   comment,
+  island,
 }

@@ -2,6 +2,7 @@ part of '../html_parser.dart';
 
 enum HtmlTokenType {
   text,
+  script,
   whitespace,
   commentOpen,
   commentText,

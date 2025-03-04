@@ -50,6 +50,8 @@ class HtmlParser {
       switch (token.type) {
         case HtmlTokenType.text:
           yield HtmlText(text: token.text);
+        case HtmlTokenType.script:
+          yield HtmlScript(script: token.text);
         case HtmlTokenType.whitespace:
           break;
         case HtmlTokenType.tagOpen:
@@ -281,6 +283,13 @@ class HtmlParser {
               break;
             case 'th':
               yield HtmlThElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'noscript':
+              yield HtmlNoscriptElement(
                 attributes: attributes,
                 children: children,
               );
