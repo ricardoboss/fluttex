@@ -295,6 +295,27 @@ class HtmlParser {
               );
 
               break;
+            case 'script':
+              yield HtmlScriptElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'style':
+              yield HtmlStyleElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
+            case 'meta':
+              yield HtmlMetaElement(
+                attributes: attributes,
+                children: children,
+              );
+
+              break;
             default:
               yield HtmlElement(
                 tagName: tagName,

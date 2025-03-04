@@ -73,7 +73,8 @@ class _HtmlDocumentRendererState extends State<HtmlDocumentRenderer> {
   }
 
   Future<void> _processStyleSheets() async {
-    final styleSheetLinks = widget.document.head?.findAllTags(
+    final styleSheetLinks =
+        widget.document.head?.findAllTags(
           'link',
           (l) => l.attributes['href']?.endsWith('.css') ?? false,
         ) ??
@@ -94,14 +95,19 @@ class _HtmlDocumentRendererState extends State<HtmlDocumentRenderer> {
   }
 
   Future<void> _loadStyleSheet(Uri uri) async {
-    requestBus.fire(ResourceRequest(
-      uri: uri,
-      fulfill: _onStyleSheetLoaded,
-      reject: (e) {
-        // TODO(ricardoboss): handle errors
-      },
-      contentTypeHint: MediaType('text', 'css'),
-    ));
+    requestBus.fire(
+      ResourceRequest(
+        uri: uri,
+        fulfill: _onStyleSheetLoaded,
+        reject: (e) {
+          // TODO(ricardoboss): handle errors
+        },
+        accept: [
+          MediaType('text', 'css'),
+          MediaType('application', 'css'),
+        ],
+      ),
+    );
   }
 
   Future<void> _onStyleSheetLoaded(http.BaseResponse response) async {
@@ -121,7 +127,8 @@ class _HtmlDocumentRendererState extends State<HtmlDocumentRenderer> {
   }
 
   Future<void> _processScripts() async {
-    final scriptLinks = widget.document.head?.findAllTags(
+    final scriptLinks =
+        widget.document.head?.findAllTags(
           'script',
           (l) => l.attributes['src'] != null,
         ) ??
@@ -142,14 +149,20 @@ class _HtmlDocumentRendererState extends State<HtmlDocumentRenderer> {
   }
 
   Future<void> _loadScript(Uri uri) async {
-    requestBus.fire(ResourceRequest(
-      uri: uri,
-      fulfill: _onScriptLoaded,
-      reject: (e) {
-        // TODO(ricardoboss): handle errors
-      },
-      contentTypeHint: MediaType('application', 'lua'),
-    ));
+    requestBus.fire(
+      ResourceRequest(
+        uri: uri,
+        fulfill: _onScriptLoaded,
+        reject: (e) {
+          // TODO(ricardoboss): handle errors
+        },
+        accept: [
+          MediaType('text', 'javascript'),
+          MediaType('application', 'javascript'),
+          MediaType('application', 'lua'),
+        ],
+      ),
+    );
   }
 
   Future<void> _onScriptLoaded(http.BaseResponse response) async {
@@ -166,21 +179,22 @@ class _HtmlDocumentRendererState extends State<HtmlDocumentRenderer> {
   Uri? _getFaviconUri(HtmlDocument document) {
     final available = <(MediaType, Uri)>[];
 
-    for (final link in document.head?.findAllTags(
-          'link',
-          (l) =>
-              [
-                'icon',
-                'shortcut icon',
-                'apple-touch-icon',
-              ].contains(l.attributes['rel']) ||
-              [
-                'ico',
-                'png',
-                'jpg',
-              ].any((ext) => l.attributes['href']?.endsWith(ext) ?? false),
-        ) ??
-        <HtmlElement>[]) {
+    for (final link
+        in document.head?.findAllTags(
+              'link',
+              (l) =>
+                  [
+                    'icon',
+                    'shortcut icon',
+                    'apple-touch-icon',
+                  ].contains(l.attributes['rel']) ||
+                  [
+                    'ico',
+                    'png',
+                    'jpg',
+                  ].any((ext) => l.attributes['href']?.endsWith(ext) ?? false),
+            ) ??
+            <HtmlElement>[]) {
       final href = link.attributes['href'];
       if (href == null) {
         continue;
@@ -192,11 +206,13 @@ class _HtmlDocumentRendererState extends State<HtmlDocumentRenderer> {
       }
 
       final maybeType = link.attributes['type'];
-      final mime = maybeType != null
-          ? MediaType.parse(maybeType)
-          : guessContentTypeByExtension(
-                  uri.pathSegments.last.split('.').last) ??
-              MediaType('image', 'png');
+      final mime =
+          maybeType != null
+              ? MediaType.parse(maybeType)
+              : guessContentTypeByExtension(
+                    uri.pathSegments.last.split('.').last,
+                  ) ??
+                  MediaType('image', 'png');
       if (mime.type != 'image') {
         continue;
       }
@@ -219,31 +235,31 @@ class _HtmlDocumentRendererState extends State<HtmlDocumentRenderer> {
         future: bodyFuture,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return LayoutBuilder(builder: (context, constraints) {
-              return SingleChildScrollView(
-                physics: const BouncingScrollPhysics(
-                  parent: AlwaysScrollableScrollPhysics(),
-                ),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minWidth: constraints.maxWidth,
-                    maxWidth: constraints.maxWidth,
-                    minHeight: constraints.maxHeight,
-                    maxHeight: double.infinity,
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(
+                    parent: AlwaysScrollableScrollPhysics(),
                   ),
-                  child: HtmlBodyRenderer(element: snapshot.requireData),
-                ),
-              );
-            });
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minWidth: constraints.maxWidth,
+                      maxWidth: constraints.maxWidth,
+                      minHeight: constraints.maxHeight,
+                      maxHeight: double.infinity,
+                    ),
+                    child: HtmlBodyRenderer(element: snapshot.requireData),
+                  ),
+                );
+              },
+            );
           }
 
           if (snapshot.hasError) {
             return ErrorWidget(snapshot.error!);
           }
 
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         },
       ),
     );

@@ -5,11 +5,11 @@ class ResourceRequest extends Request<http.BaseResponse> {
     required this.uri,
     required this.fulfill,
     required this.reject,
-    this.contentTypeHint,
+    this.accept,
   });
 
   final Uri uri;
-  final MediaType? contentTypeHint;
+  final Iterable<MediaType>? accept;
 
   @override
   final FutureOr<void> Function(http.BaseResponse response) fulfill;
@@ -19,5 +19,5 @@ class ResourceRequest extends Request<http.BaseResponse> {
 
   @override
   String get debug =>
-      '$ResourceRequest -> $uri (${contentTypeHint?.toString() ?? '???'})';
+      '$ResourceRequest -> $uri (${accept?.toString() ?? '???'})';
 }

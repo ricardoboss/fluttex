@@ -16,29 +16,26 @@ class Client {
   static http.Client get client => _client ??= _initClient();
 
   static http.Client _initClient() {
-    return RetryClient(
-      http.Client(),
-    );
+    return RetryClient(http.Client());
   }
 
   static void _onQueryRequest(QueryRequest request) {
-    requestBus.fire(ResolveQuery(
-      query: request.query,
-      fulfill: (url) => _onQueryResolved(request, url),
-      reject: (e) => request.reject(e),
-    ));
+    requestBus.fire(
+      ResolveQuery(
+        query: request.query,
+        fulfill: (url) => _onQueryResolved(request, url),
+        reject: (e) => request.reject(e),
+      ),
+    );
   }
 
-  static Future<(Uri, MediaType?)> _resolveUrl(Uri uri) async {
+  static Future<(Uri, Iterable<MediaType>?)> _resolveUrl(Uri uri) async {
     uri = uri.replace(scheme: 'https');
 
     return (uri, null);
   }
 
-  static Future<void> _onQueryResolved(
-    QueryRequest request,
-    Uri url,
-  ) async {
+  static Future<void> _onQueryResolved(QueryRequest request, Uri url) async {
     uiBus.fire(UriChangedEvent(url.toString()));
 
     final (resolvedUrl, expectedMediaType) = await _resolveUrl(url);
@@ -47,27 +44,30 @@ class Client {
   }
 
   static Future<void> _onResourceRequest(ResourceRequest request) async {
-    await _onDnsResolved(request, request.uri, request.contentTypeHint);
+    await _onDnsResolved(request, request.uri, request.accept);
   }
 
   static Future<void> _onDnsResolved(
     Request<http.BaseResponse> request,
     Uri uri,
-    MediaType? expectedMediaType,
+    Iterable<MediaType>? accept,
   ) async {
     final http.BaseResponse response;
 
+    final headers = <String, String>{};
+    if (accept != null) {
+      headers['Accept'] = accept.map((m) => m.toString()).join(', ');
+    }
+
     try {
-      response = await _get(uri);
+      response = await _get(
+        uri,
+        headers: headers,
+      );
     } catch (e) {
       await request.reject(e);
 
       return;
-    }
-
-    if (expectedMediaType != null &&
-        response.headers['content-type'] != expectedMediaType.mimeType) {
-      response.headers['content-type'] = expectedMediaType.mimeType;
     }
 
     await request.fulfill(response);
@@ -79,10 +79,7 @@ class Client {
   }) async {
     return await client.get(
       uri,
-      headers: {
-        ...?headers,
-        'User-Agent': _userAgent,
-      },
+      headers: {...?headers, 'User-Agent': _userAgent},
     );
   }
 }

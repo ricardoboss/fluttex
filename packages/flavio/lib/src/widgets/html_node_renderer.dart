@@ -21,6 +21,8 @@ class HtmlNodeRenderer {
         return HtmlDivLikeRenderer(element: footer);
       case final HtmlArticleElement article:
         return HtmlDivLikeRenderer(element: article);
+      case final HtmlNoscriptElement noscript:
+        return HtmlDivLikeRenderer(element: noscript);
       case final HtmlHrElement hr:
         return HtmlHrRenderer(element: hr);
       case final HtmlHElement h:
@@ -43,6 +45,34 @@ class HtmlNodeRenderer {
         return HtmlListRenderer(element: ol);
       case final HtmlTableElement table:
         return HtmlTableRenderer(table: table);
+      case final HtmlStyleElement style:
+        try {
+          final map = CssParser.parse(style.text);
+
+          var applied = false;
+          return Builder(builder: (context) {
+            final c = HtmlContext.of(context);
+
+            if (!applied) {
+              c.styleController.addMap(map);
+              applied = true;
+            }
+
+            return SizedBox.shrink();
+          });
+        } catch (e) {
+          return Text(
+            'Error parsing CSS: ${e.toString()}',
+            style: TextStyle(
+              color: Colors.yellow,
+              backgroundColor: Colors.red,
+              fontWeight: FontWeight.bold,
+            ),
+          );
+        }
+      case final HtmlScriptElement script:
+        // TODO(ricardoboss): execute script
+        return const SizedBox.shrink();
       case final HtmlErrorNode errorNode:
         return Text(
           errorNode.message,
@@ -54,7 +84,7 @@ class HtmlNodeRenderer {
         );
       case final HtmlElement element:
         return Text(
-          'Unimplemented element: ${element.tagName}',
+          'Unimplemented element: <${element.tagName}>',
           style: TextStyle(
             color: Color(0x88888888),
           ),

@@ -19,6 +19,7 @@ class HtmlDivLikeRenderer extends StatelessWidget with StyleResolver {
         'header',
         'footer',
         'section',
+        'noscript'
       ].contains(element.tagName);
     })());
 
@@ -32,7 +33,7 @@ class HtmlDivLikeRenderer extends StatelessWidget with StyleResolver {
       nodes: element.children,
       direction: direction.axis,
       alignment: alignment,
-      gap: gap,
+      spacing: gap,
     );
   }
 
