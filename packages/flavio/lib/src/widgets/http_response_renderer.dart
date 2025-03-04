@@ -34,7 +34,8 @@ class HttpResponseRenderer extends StatelessWidget {
   }
 
   // TODO(ricardoboss): use encoding from headers
-  String get body => utf8.decode(responseBody);
+  // TODO(ricardoboss): why malformed? wrong encoding?
+  String get body => utf8.decode(responseBody, allowMalformed: true);
 
   String get filename => requestUri!.pathSegments.last;
 
